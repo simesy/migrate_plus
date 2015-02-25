@@ -1,0 +1,7 @@
+vid: migrate_example_beer_styles
+name: Migrate Example Beer Styles
+description: 'Use tags to group beers on similar topics into categories.'
+hierarchy: 1
+weight: 0
+status: true
+langcode: en

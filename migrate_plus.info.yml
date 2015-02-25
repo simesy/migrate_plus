@@ -3,3 +3,5 @@ name: Migrate Plus
 description: 'Tools to assist in developing and running migrations.'
 package: Migration
 core: 8.x
+dependencies:
+  - migrate

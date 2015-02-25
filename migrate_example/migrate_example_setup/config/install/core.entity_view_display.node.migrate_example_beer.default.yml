@@ -1,0 +1,60 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.migrate_example_beer.body
+    - field.field.node.migrate_example_beer.comment
+    - field.field.node.migrate_example_beer.field_migrate_example_country
+    - field.field.node.migrate_example_beer.field_migrate_example_image
+    - field.field.node.migrate_example_beer.migrate_example_beer_styles
+    - node.type.migrate_example_beer
+  module:
+    - comment
+    - image
+    - taxonomy
+    - text
+    - user
+id: node.migrate_example_beer.default
+targetEntityType: node
+bundle: migrate_example_beer
+mode: default
+content:
+  links:
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+  field_migrate_example_image:
+    type: image
+    weight: 1
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {  }
+    label: above
+  body:
+    type: text_default
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+    label: hidden
+  migrate_example_beer_styles:
+    type: taxonomy_term_reference_link
+    weight: 3
+    settings: {  }
+    third_party_settings: {  }
+    label: above
+  field_migrate_example_country:
+    type: string
+    weight: 4
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    label: above
+  comment:
+    type: comment_default
+    weight: 5
+    settings:
+      pager_id: 0
+    third_party_settings: {  }
+    label: above
+hidden: {  }
