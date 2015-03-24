@@ -28,7 +28,7 @@ function migrate_plus_drush_command() {
       'migrate-status --group=beer' => 'Retrieve status for all migrations in a given group',
       'migrate-status BeerTerm,BeerNode' => 'Retrieve status for specific migrations',
     ),
-    'drupal dependencies' => array('migrate'),
+    'drupal dependencies' => array('migrate_plus'),
     'aliases' => array('ms'),
   );
 
@@ -46,7 +46,7 @@ function migrate_plus_drush_command() {
       'migrate-import --group=beer' => 'Import all migrations in the beer group',
       'migrate-import BeerTerm,BeerNode' => 'Import new terms and nodes',
     ),
-    'drupal dependencies' => array('migrate'),
+    'drupal dependencies' => array('migrate_plus'),
     'aliases' => array('mi'),
   );
 
