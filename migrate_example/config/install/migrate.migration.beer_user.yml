@@ -1,7 +1,6 @@
 id: beer_user
 label: Beer Drinkers of the world
-migration_groups:
-  - beer
+migration_group: beer
 source:
   plugin: beer_user
 destination:

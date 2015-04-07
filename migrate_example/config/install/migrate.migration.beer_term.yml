@@ -1,7 +1,6 @@
 id: beer_term
 label: Migrate styles from the source database to taxonomy terms
-migration_groups:
-  - beer
+migration_group: beer
 source:
   plugin: beer_term
 destination:

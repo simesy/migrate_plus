@@ -16,10 +16,11 @@ translatable: false
 default_value: {  }
 default_value_callback: ''
 settings:
-  handler: default
+  handler: 'default:node'
   handler_settings:
     target_bundles:
       migrate_example_beer: migrate_example_beer
     sort:
-      field: _none
+      field: title
+      direction: ASC
 field_type: entity_reference
