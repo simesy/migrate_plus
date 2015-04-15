@@ -175,10 +175,15 @@ function drush_migrate_plus_migration_list($group_id = '', $migration_ids = '') 
   $return = array();
   foreach ($migrations as $migration_id => $migration) {
     if (empty($migration_ids) || in_array(Unicode::strtolower($migration_id), $migration_ids)) {
-      $group_id = reset($migration->migration_groups);
-      // @todo: Temporary - ignore incomplete migrate_drupal migrations.
-      if (substr($group_id, 0, 7) == 'Drupal ' && !$migration->get('source.key')) {
-        continue;
+      if (is_array($migration->migration_groups)) {
+        $group_id = reset($migration->migration_groups);
+        // @todo: Temporary - ignore incomplete migrate_drupal migrations.
+        if (substr($group_id, 0, 7) == 'Drupal ' && !$migration->get('source.key')) {
+          continue;
+        }
+      }
+      else {
+        $group_id = 'default';
       }
       $return[$group_id][$migration_id] = $migration;
     }
