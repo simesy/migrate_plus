@@ -89,10 +89,6 @@ function drush_migrate_plus_migrate_status($migration_names = '') {
           $source_rows = dt('N/A');
           $unprocessed = dt('N/A');
         }
-        elseif (!$source_plugin->query()) {
-          $source_rows = dt('N/A');
-          $unprocessed = dt('N/A');
-        }
         else {
           $source_rows = $source_plugin->count();
           $unprocessed = $source_rows - $map->processedCount();
