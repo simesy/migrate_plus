@@ -79,9 +79,14 @@ function drush_migrate_plus_migrate_status($migration_names = '') {
       );
     }
     foreach ($migration_list as $migration_id => $migration) {
-      $map = $migration->getIdMap();
-      $imported = $map->importedCount();
-      $source_plugin = $migration->getSourcePlugin();
+      try {
+        $map = $migration->getIdMap();
+        $imported = $map->importedCount();
+        $source_plugin = $migration->getSourcePlugin();
+      }
+      catch (Exception $e) {
+        continue;
+      }
       // We can't get counts from an EmptySource plugin, or one without a query.
       // @todo: Is there a more general approach? Are there other edge cases?
       try {
