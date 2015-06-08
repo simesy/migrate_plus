@@ -87,10 +87,8 @@ function drush_migrate_plus_migrate_status($migration_names = '') {
       catch (Exception $e) {
         continue;
       }
-      // We can't get counts from an EmptySource plugin, or one without a query.
-      // @todo: Is there a more general approach? Are there other edge cases?
       try {
-        if (is_a($source_plugin, 'Drupal\migrate\Plugin\migrate\source\EmptySource')) {
+        if (!method_exists($source_plugin, 'count')) {
           $source_rows = dt('N/A');
           $unprocessed = dt('N/A');
         }
@@ -156,7 +154,7 @@ function drush_migrate_plus_migrate_import($migration_names = '') {
 function drush_migrate_plus_migration_list($group_id = '', $migration_ids = '') {
   $query = \Drupal::entityQuery('migration');
   if ($group_id) {
-    $query->condition('migration_groups.*', $group_id);
+    $query->condition('migration_group', $group_id);
   }
   $names = $query->execute();
 
@@ -176,17 +174,10 @@ function drush_migrate_plus_migration_list($group_id = '', $migration_ids = '') 
   $return = array();
   foreach ($migrations as $migration_id => $migration) {
     if (empty($migration_ids) || in_array(Unicode::strtolower($migration_id), $migration_ids)) {
-      if (is_array($migration->migration_groups)) {
-        $group_id = reset($migration->migration_groups);
-        // @todo: Temporary - ignore incomplete migrate_drupal migrations.
-        if (substr($group_id, 0, 7) == 'Drupal ' && !$migration->get('source.key')) {
-          continue;
-        }
+      $group_id = $migration->get('migration_group');
+      if (!empty($group_id)) {
+        $return[$group_id][$migration_id] = $migration;
       }
-      else {
-        $group_id = 'default';
-      }
-      $return[$group_id][$migration_id] = $migration;
     }
   }
   return $return;
