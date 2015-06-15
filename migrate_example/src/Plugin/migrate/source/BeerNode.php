@@ -26,10 +26,6 @@ class BeerNode extends MigrateExampleSqlBase {
                  ->fields('b', array('bid', 'name', 'body', 'excerpt', 'aid',
                    'countries', 'image', 'image_alt', 'image_title',
                    'image_description'));
-    $query->leftJoin('migrate_example_beer_topic_node', 'tb', 'b.bid = tb.bid');
-    // Gives a single comma-separated list of related terms
-    $query->groupBy('tb.bid');
-    $query->addExpression('GROUP_CONCAT(tb.style)', 'terms');
     return $query;
   }
 
@@ -66,7 +62,20 @@ class BeerNode extends MigrateExampleSqlBase {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function prepareRow(Row $row) {
+    if (parent::prepareRow($row) === FALSE) {
+      return FALSE;
+    }
+
+    $row->terms = $this->select('migrate_example_beer_topic_node', 'bt')
+                 ->fields('bt', array('style'))
+      ->condition('bid', $row->bid)
+      ->execute()
+      ->fetchCol();
+
     if ($value = $row->getSourceProperty('countries')) {
       $row->setSourceProperty('countries', explode('|', $value));
     }
