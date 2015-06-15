@@ -8,7 +8,7 @@
 use Drupal\Component\Utility\Unicode;
 use Drupal\migrate\Entity\MigrationInterface;
 use Drupal\migrate\MigrateExecutable;
-use Drush\Migrate\DrushLogMigrateMessage;
+use Drupal\migrate_plus\DrushLogMigrateMessage;
 
 /**
  * Implements hook_drush_command().
