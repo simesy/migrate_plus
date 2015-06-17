@@ -9,6 +9,7 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\migrate\Entity\MigrationInterface;
 use Drupal\migrate\MigrateExecutable;
 use Drupal\migrate_plus\DrushLogMigrateMessage;
+use Drupal\migrate_plus\MigrateManifest;
 
 /**
  * Implements hook_drush_command().
@@ -50,6 +51,21 @@ function migrate_plus_drush_command() {
     'aliases' => array('mi'),
   );
 
+  $items['migrate-manifest'] = array(
+    'description' => 'Execute the migrations as specified in a manifest file.',
+    'arguments' => array(
+      'manifest' => 'The path to the manifest file',
+    ),
+    'required-arguments' => 1,
+    'options' => array(
+      'legacy-db-url' => array(
+        'description' => 'A Drupal 6 style database URL.',
+        'example-value' => 'mysql://root:pass@127.0.0.1/db',
+        'required' => TRUE,
+      ),
+    ),
+    'drupal dependencies' => array('migrate_plus'),
+  );
   return $items;
 }
 
@@ -181,4 +197,44 @@ function drush_migrate_plus_migration_list($group_id = '', $migration_ids = '') 
     }
   }
   return $return;
+}
+
+
+/**
+ * Import from a manifest file.
+ *
+ * This command allows you to specify a list of migrations and their config in
+ * a YAML file. An example of a simple migration may look like this:
+ *
+ * @code
+ *  - d6_action_settings
+ *  - d6_aggregator_feed
+ * @endcode
+ *
+ * You can also provide configuration to a migration for both source and the
+ * destination. An example as such:
+ *
+ * @code
+ *  - d6_file:
+ *    source:
+ *      conf_path: sites/assets
+ *    destination:
+ *      source_base_path: destination/base/path
+ *      destination_path_property: uri
+ *  - d6_action_settings
+ * @endcode
+ *
+ * @param string $manifest
+ *   The path to the manifest file.
+ */
+function drush_migrate_plus_migrate_manifest($manifest) {
+  try {
+    $manifest_runner = new MigrateManifest($manifest);
+    return $manifest_runner->import();
+  }
+  catch (\Exception $e) {
+    drush_set_error('MIGRATE_ERROR', $e->getMessage());
+  }
+
+  drush_invoke_process('@self', 'cache-rebuild', array(), array(), FALSE);
 }
