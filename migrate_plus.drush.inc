@@ -194,6 +194,9 @@ function drush_migrate_plus_migration_list($group_id = '', $migration_ids = '') 
       if (!empty($group_id)) {
         $return[$group_id][$migration_id] = $migration;
       }
+      else {
+        $return['default'][$migration_id] = $migration;
+      }
     }
   }
   return $return;

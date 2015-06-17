@@ -1,0 +1,3 @@
+# A default group, assigned to any migrations with no explicit group.
+id: default
+label: Default
