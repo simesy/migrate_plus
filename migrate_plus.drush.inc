@@ -104,12 +104,13 @@ function drush_migrate_plus_migrate_status($migration_names = '') {
         continue;
       }
       try {
-        if (!method_exists($source_plugin, 'count')) {
+        $source_rows = $source_plugin->count();
+        // -1 indicates uncountable sources.
+        if ($source_rows == -1) {
           $source_rows = dt('N/A');
           $unprocessed = dt('N/A');
         }
         else {
-          $source_rows = $source_plugin->count();
           $unprocessed = $source_rows - $map->processedCount();
         }
       }
