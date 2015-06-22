@@ -100,7 +100,7 @@ function migrate_example_beer_schema_topic() {
     'description' => 'Categories',
     'fields' => array(
       'style'  => array(
-        'type' => 'varchar',
+        'type' => 'varchar_ascii',
         'length' => 255,
         'not null' => TRUE,
       ),
@@ -142,7 +142,7 @@ function migrate_example_beer_schema_topic_node() {
         'description' => 'Beer ID.',
       ),
       'style'  => array(
-        'type' => 'varchar',
+        'type' => 'varchar_ascii',
         'length' => 255,
         'not null' => TRUE,
         'description' => 'Topic name',
