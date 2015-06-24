@@ -70,17 +70,17 @@ class BeerNode extends MigrateExampleSqlBase {
       return FALSE;
     }
 
-    $row->terms = $this->select('migrate_example_beer_topic_node', 'bt')
+    $terms = $this->select('migrate_example_beer_topic_node', 'bt')
                  ->fields('bt', array('style'))
-      ->condition('bid', $row->bid)
+      ->condition('bid', $row->getSourceProperty('bid'))
       ->execute()
       ->fetchCol();
+    drush_print('terms:');
+    drush_print_r($terms);
+    $row->setSourceProperty('terms', $terms);
 
     if ($value = $row->getSourceProperty('countries')) {
       $row->setSourceProperty('countries', explode('|', $value));
-    }
-    if ($value = $row->getSourceProperty('terms')) {
-      $row->setSourceProperty('terms', explode(',', $value));
     }
   }
 
