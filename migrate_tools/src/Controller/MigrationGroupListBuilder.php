@@ -1,0 +1,72 @@
+<?php
+/**
+ * @file
+ * Contains Drupal\migrate_tools\Controller\MigrationGroupListBuilder.
+ */
+
+namespace Drupal\migrate_tools\Controller;
+
+use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * Provides a listing of migration group entities.
+ *
+ * @package Drupal\migrate_tools\Controller
+ *
+ * @ingroup migrate_tools
+ */
+class MigrationGroupListBuilder extends ConfigEntityListBuilder {
+
+  /**
+   * Builds the header row for the entity listing.
+   *
+   * @return array
+   *   A render array structure of header strings.
+   *
+   * @see Drupal\Core\Entity\EntityListController::render()
+   */
+  public function buildHeader() {
+    $header['label'] = $this->t('Migration Group');
+    $header['machine_name'] = $this->t('Machine Name');
+    $header['description'] = $this->t('Description');
+    $header['source_type'] = $this->t('Source Type');
+    return $header + parent::buildHeader();
+  }
+
+  /**
+   * Builds a row for an entity in the entity listing.
+   *
+   * @param EntityInterface $entity
+   *   The entity for which to build the row.
+   *
+   * @return array
+   *   A render array of the table row for displaying the entity.
+   *
+   * @see Drupal\Core\Entity\EntityListController::render()
+   */
+  public function buildRow(ConfigEntityInterface $entity) {
+    $row['label'] = $this->getLabel($entity);
+    $row['machine_name'] = $entity->id();
+    $row['description'] = $entity->get('description');
+    $row['source_type'] = $entity->get('source_type');
+
+    return $row + parent::buildRow($entity);
+  }
+
+  /**
+   * Adds some descriptive text to our entity list.
+   *
+   * @return array
+   *   Renderable array.
+   */
+  public function render() {
+    $build['description'] = array(
+      '#markup' => $this->t("<p>Initial POC of the migration dashboard - note that management of the migrations themselves is not yet implemented, only the groups.</p>"),
+    );
+    $build[] = parent::render();
+    return $build;
+  }
+
+}

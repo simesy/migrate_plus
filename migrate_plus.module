@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Provides tools and enhancements for implementing and managing migrations.
+ * Provides enhancements for implementing and managing migrations.
  */
 
 use Drupal\migrate\Entity\MigrationInterface;

@@ -8,6 +8,12 @@ migrate_plus.migration_group.*:
     label:
       type: label
       label: 'Label'
+    description:
+      type: string
+      label: 'Description'
+    source_type:
+      type: string
+      label: 'Source type'
     module:
       type: string
       label: 'Dependent module'
