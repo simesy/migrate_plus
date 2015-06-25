@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\migrate_plus\DrushLogMigrateMessage.
+ * Contains \Drupal\migrate_tools\DrushLogMigrateMessage.
  */
 
-namespace Drupal\migrate_plus;
+namespace Drupal\migrate_tools;
 
 use Drupal\migrate\MigrateMessageInterface;
 

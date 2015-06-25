@@ -75,8 +75,6 @@ class BeerNode extends MigrateExampleSqlBase {
       ->condition('bid', $row->getSourceProperty('bid'))
       ->execute()
       ->fetchCol();
-    drush_print('terms:');
-    drush_print_r($terms);
     $row->setSourceProperty('terms', $terms);
 
     if ($value = $row->getSourceProperty('countries')) {

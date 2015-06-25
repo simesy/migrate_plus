@@ -8,13 +8,13 @@
 use Drupal\Component\Utility\Unicode;
 use Drupal\migrate\Entity\MigrationInterface;
 use Drupal\migrate\MigrateExecutable;
-use Drupal\migrate_plus\DrushLogMigrateMessage;
-use Drupal\migrate_plus\MigrateManifest;
+use Drupal\migrate_tools\DrushLogMigrateMessage;
+use Drupal\migrate_tools\MigrateManifest;
 
 /**
  * Implements hook_drush_command().
  */
-function migrate_plus_drush_command() {
+function migrate_tools_drush_command() {
   $items['migrate-status'] = array(
     'description' => 'List all migrations with current status.',
     'options' => array(
@@ -29,7 +29,7 @@ function migrate_plus_drush_command() {
       'migrate-status --group=beer' => 'Retrieve status for all migrations in a given group',
       'migrate-status BeerTerm,BeerNode' => 'Retrieve status for specific migrations',
     ),
-    'drupal dependencies' => array('migrate_plus'),
+    'drupal dependencies' => array('migrate_tools'),
     'aliases' => array('ms'),
   );
 
@@ -47,7 +47,7 @@ function migrate_plus_drush_command() {
       'migrate-import --group=beer' => 'Import all migrations in the beer group',
       'migrate-import BeerTerm,BeerNode' => 'Import new terms and nodes',
     ),
-    'drupal dependencies' => array('migrate_plus'),
+    'drupal dependencies' => array('migrate_tools'),
     'aliases' => array('mi'),
   );
 
@@ -64,7 +64,7 @@ function migrate_plus_drush_command() {
         'required' => TRUE,
       ),
     ),
-    'drupal dependencies' => array('migrate_plus'),
+    'drupal dependencies' => array('migrate_tools'),
   );
   return $items;
 }
@@ -72,11 +72,11 @@ function migrate_plus_drush_command() {
 /**
  * @param string $migration_names
  */
-function drush_migrate_plus_migrate_status($migration_names = '') {
+function drush_migrate_tools_migrate_status($migration_names = '') {
   $group_name = drush_get_option('group');
   $names_only = drush_get_option('names-only');
 
-  $migrations = drush_migrate_plus_migration_list($group_name, $migration_names);
+  $migrations = drush_migrate_tools_migration_list($group_name, $migration_names);
 
   $table = array();
   // Take it one group at a time, listing the migrations within each group.
@@ -135,7 +135,7 @@ function drush_migrate_plus_migrate_status($migration_names = '') {
 /**
  * @param string $migration_names
  */
-function drush_migrate_plus_migrate_import($migration_names = '') {
+function drush_migrate_tools_migrate_import($migration_names = '') {
   $group_name = drush_get_option('group');
   $all = drush_get_option('all');
   if (!$all && !$group_name && !$migration_names) {
@@ -145,7 +145,7 @@ function drush_migrate_plus_migrate_import($migration_names = '') {
 
   $log = new DrushLogMigrateMessage();
 
-  $migrations = drush_migrate_plus_migration_list($group_name, $migration_names);
+  $migrations = drush_migrate_tools_migration_list($group_name, $migration_names);
 
   // Take it one group at a time, importing the migrations within each group.
   foreach ($migrations as $group_id => $migration_list) {
@@ -168,7 +168,7 @@ function drush_migrate_plus_migrate_import($migration_names = '') {
  * @return MigrationInterface[][]
  *   An array keyed by migration group, each value containing an array of migrations.
  */
-function drush_migrate_plus_migration_list($group_id = '', $migration_ids = '') {
+function drush_migrate_tools_migration_list($group_id = '', $migration_ids = '') {
   $query = \Drupal::entityQuery('migration');
   if ($group_id) {
     $query->condition('migration_group', $group_id);
@@ -231,7 +231,7 @@ function drush_migrate_plus_migration_list($group_id = '', $migration_ids = '') 
  * @param string $manifest
  *   The path to the manifest file.
  */
-function drush_migrate_plus_migrate_manifest($manifest) {
+function drush_migrate_tools_migrate_manifest($manifest) {
   try {
     $manifest_runner = new MigrateManifest($manifest);
     return $manifest_runner->import();

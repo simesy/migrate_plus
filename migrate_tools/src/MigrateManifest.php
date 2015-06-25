@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\migrate_plus\MigrateManifest
+ * Contains \Drupal\migrate_tools\MigrateManifest
  */
 
-namespace Drupal\migrate_plus;
+namespace Drupal\migrate_tools;
 
 use Drupal\Component\Utility\NestedArray;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
@@ -33,7 +33,7 @@ class MigrateManifest {
   /**
    * The message log.
    *
-   * @var \Drupal\migrate_plus\DrushLogMigrateMessage
+   * @var \Drupal\migrate_tools\DrushLogMigrateMessage
    */
   protected $log;
 
