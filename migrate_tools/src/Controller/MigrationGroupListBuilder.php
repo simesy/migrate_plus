@@ -9,6 +9,7 @@ namespace Drupal\migrate_tools\Controller;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Url;
 
 /**
  * Provides a listing of migration group entities.
@@ -56,17 +57,17 @@ class MigrationGroupListBuilder extends ConfigEntityListBuilder {
   }
 
   /**
-   * Adds some descriptive text to our entity list.
-   *
-   * @return array
-   *   Renderable array.
+   * {@inheritdoc}
    */
-  public function render() {
-    $build['description'] = array(
-      '#markup' => $this->t("<p>Initial POC of the migration dashboard - note that management of the migrations themselves is not yet implemented, only the groups.</p>"),
+  public function getDefaultOperations(EntityInterface $entity) {
+    $operations = parent::getDefaultOperations($entity);
+    $operations['list'] = array(
+      'title' => $this->t('List migrations'),
+      'weight' => 0,
+      'url' => Url::fromRoute('entity.migration.list', ['migration_group' => $entity->id()]),
     );
-    $build[] = parent::render();
-    return $build;
+
+    return $operations;
   }
 
 }

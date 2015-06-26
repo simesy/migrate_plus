@@ -1,4 +1,4 @@
-# This is the router item for listing all entities.
+# This is the router item for listing all migration group entities.
 entity.migration_group.list:
   path: '/admin/structure/migrate'
   defaults:
@@ -7,7 +7,7 @@ entity.migration_group.list:
   requirements:
     _permission: 'administer migrations'
 
-# This is the router item for adding our entity.
+# This is the router item for adding our migration group entity.
 entity.migration_group.add_form:
   path: '/admin/structure/migrate/add'
   defaults:
@@ -16,7 +16,7 @@ entity.migration_group.add_form:
   requirements:
     _entity_create_access: migration_group
 
-# This is the router item for editing our entity.
+# This is the router item for editing our migration group entity.
 entity.migration_group.edit_form:
   path: '/admin/structure/migrate/manage/{migration_group}'
   defaults:
@@ -25,7 +25,7 @@ entity.migration_group.edit_form:
   requirements:
     _entity_access: migration_group.update
 
-# This is the router item for deleting an instance of our entity.
+# This is the router item for deleting an instance of our migration group entity.
 entity.migration_group.delete_form:
   path: '/admin/structure/migrate/manage/{migration_group}/delete'
   defaults:
@@ -33,3 +33,12 @@ entity.migration_group.delete_form:
     _entity_form: migration_group.delete
   requirements:
     _entity_access: migration_group.delete
+
+# This is the router item for listing all migration entities.
+entity.migration.list:
+  path: '/admin/structure/migrate/manage/{migration_group}/migrations'
+  defaults:
+    _entity_list: 'migration'
+    _title: 'Migrations'
+  requirements:
+    _permission: 'administer migrations'

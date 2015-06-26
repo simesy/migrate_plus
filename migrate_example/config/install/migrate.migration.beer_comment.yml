@@ -1,5 +1,5 @@
 id: beer_comment
-label: Beers of the world
+label: Comments on beers
 migration_group: beer
 source:
   plugin: beer_comment
