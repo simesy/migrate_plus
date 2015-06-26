@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityHandlerInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Routing\CurrentRouteMatch;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -117,6 +118,28 @@ class MigrationListBuilder extends ConfigEntityListBuilder implements EntityHand
       ->sort($keys['id'])
       ->pager($this->limit)
       ->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultOperations(MigrationInterface $entity) {
+    $operations = parent::getDefaultOperations($entity);
+    $this->addGroupParameter($operations['edit']['url'], $entity->get('migration_group'));
+    $this->addGroupParameter($operations['delete']['url'], $entity->get('migration_group'));
+    return $operations;
+  }
+
+  /**
+   * @param \Drupal\Core\Url $url
+   *   The URL associated with an operation.
+   *
+   * @param $migration_group
+   *   The migration's parent group.
+   */
+  protected function addGroupParameter(Url $url, $migration_group) {
+    $route_parameters = $url->getRouteParameters() + array('migration_group' => $migration_group);
+    $url->setRouteParameters($route_parameters);
   }
 
 }

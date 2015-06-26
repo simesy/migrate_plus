@@ -42,3 +42,30 @@ entity.migration.list:
     _title: 'Migrations'
   requirements:
     _permission: 'administer migrations'
+
+# This is the router item for adding our migration entity.
+entity.migration.add_form:
+  path: '/admin/structure/migrate/manage/{migration_group}/migrations/add'
+  defaults:
+    _title: 'Add migration'
+    _entity_form: migration.add
+  requirements:
+    _entity_create_access: migration
+
+# This is the router item for editing our migration entity.
+entity.migration.edit_form:
+  path: '/admin/structure/migrate/manage/{migration_group}/migrations/{migration}'
+  defaults:
+    _title: 'Edit migration'
+    _entity_form: migration.edit
+  requirements:
+    _entity_access: migration.update
+
+# This is the router item for deleting an instance of our migration entity.
+entity.migration.delete_form:
+  path: '/admin/structure/migrate/manage/{migration_group}/migrations/{migration}/delete'
+  defaults:
+    _title: 'Delete migration'
+    _entity_form: migration.delete
+  requirements:
+    _entity_access: migration.delete

@@ -1,13 +1,11 @@
-migrate_tools.add_action:
+migrate_tools.add_group_action:
   route_name: entity.migration_group.add_form
   title: 'Add migration group'
   appears_on:
     - entity.migration_group.list
 
-migrate_tools.list_action:
-  route_name: entity.migration_group.list
-  title: 'List Migration Groups'
+migrate_tools.add_migration_action:
+  route_name: entity.migration.add_form
+  title: 'Add migration'
   appears_on:
-    - entity.migration_group.add_form
-    - entity.migration_group.edit
-    - entity.migration_group.delete
+    - entity.migration.list

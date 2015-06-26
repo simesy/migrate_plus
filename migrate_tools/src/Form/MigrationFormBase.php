@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\migrate_tools\Form\MigrationGroupFormBase.
+ * Contains Drupal\migrate_tools\Form\MigrationFormBase.
  */
 
 namespace Drupal\migrate_tools\Form;
@@ -10,17 +10,18 @@ namespace Drupal\migrate_tools\Form;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\migrate_plus\Entity\MigrationGroupInterface;
+use Drupal\migrate\Entity\MigrationInterface;
 
 /**
- * Class MigrationGroupFormBase.
+ * Class MigrationFormBase.
  *
  * @package Drupal\migrate_tools\Form
  *
  * @ingroup migrate_tools
  */
-class MigrationGroupFormBase extends EntityForm {
+class MigrationFormBase extends EntityForm {
 
   /**
    * @var \Drupal\Core\Entity\Query\QueryFactory
@@ -30,7 +31,7 @@ class MigrationGroupFormBase extends EntityForm {
   /**
    * Construct the MigrationGroupFormBase.
    *
-   * For simple entity forms, there's no need for a constructor. Our migration group form
+   * For simple entity forms, there's no need for a constructor. Our migration form
    * base, however, requires an entity query factory to be injected into it
    * from the container. We later use this query factory to build an entity
    * query for the exists() method.
@@ -43,7 +44,7 @@ class MigrationGroupFormBase extends EntityForm {
   }
 
   /**
-   * Factory method for MigrationGroupFormBase.
+   * Factory method for MigrationFormBase.
    */
   public static function create(ContainerInterface $container) {
     return new static($container->get('entity.query'));
@@ -60,49 +61,53 @@ class MigrationGroupFormBase extends EntityForm {
    *   An associative array containing the current state of the form.
    *
    * @return array
-   *   An associative array containing the migration group add/edit form.
+   *   An associative array containing the migration add/edit form.
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Get anything we need from the base class.
     $form = parent::buildForm($form, $form_state);
 
-    /** @var MigrationGroupInterface $migration_group */
-    $migration_group = $this->entity;
+    /** @var MigrationInterface $migration */
+    $migration = $this->entity;
 
     // Build the form.
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('Label'),
       '#maxlength' => 255,
-      '#default_value' => $migration_group->label(),
+      '#default_value' => $migration->label(),
       '#required' => TRUE,
     );
     $form['id'] = array(
       '#type' => 'machine_name',
       '#title' => $this->t('Machine name'),
-      '#default_value' => $migration_group->id(),
+      '#default_value' => $migration->id(),
       '#machine_name' => array(
         'exists' => array($this, 'exists'),
         'replace_pattern' => '([^a-z0-9_]+)|(^custom$)',
         'error' => 'The machine-readable name must be unique, and can only contain lowercase letters, numbers, and underscores. Additionally, it can not be the reserved word "custom".',
       ),
-      '#disabled' => !$migration_group->isNew(),
-    );
-    $form['description'] = array(
-      '#type' => 'textfield',
-      '#title' => $this->t('Description'),
-      '#maxlength' => 255,
-      '#default_value' => $migration_group->get('description'),
-    );
-    $form['source_type'] = array(
-      '#type' => 'textfield',
-      '#title' => $this->t('Source type'),
-      '#description' => $this->t('Type of source system the group is migrating from, for example "Drupal 6" or "WordPress 4".'),
-      '#maxlength' => 255,
-      '#default_value' => $migration_group->get('source_type'),
+      '#disabled' => !$migration->isNew(),
     );
 
-    // Return the form.
+    $groups = entity_load_multiple('migration_group');
+    $group_options = [];
+    foreach ($groups as $group) {
+      $group_options[$group->id()] = $group->label();
+    }
+    if (!$migration->get('migration_group') && isset($group_options['default'])) {
+      $migration->set('migration_group', 'default');
+    }
+
+    $form['migration_group'] = array(
+      '#type' => 'select',
+      '#title' => $this->t('Migration Group'),
+      '#empty_value' => '',
+      '#default_value' => $migration->get('migration_group'),
+      '#options' => $group_options,
+      '#description' => $this->t('Assign this migration to an existing group.'),
+    );
+
     return $form;
   }
 
@@ -120,8 +125,8 @@ class MigrationGroupFormBase extends EntityForm {
    *   TRUE if this format already exists, FALSE otherwise.
    */
   public function exists($entity_id, array $element, FormStateInterface $form_state) {
-    // Use the query factory to build a new migration group entity query.
-    $query = $this->entityQueryFactory->get('migration_group');
+    // Use the query factory to build a new migration entity query.
+    $query = $this->entityQueryFactory->get('migration');
 
     // Query the entity ID to see if its in use.
     $result = $query->condition('id', $element['#field_prefix'] . $entity_id)
@@ -162,20 +167,21 @@ class MigrationGroupFormBase extends EntityForm {
    *   An associative array containing the current state of the form.
    */
   public function save(array $form, FormStateInterface $form_state) {
-    $migration_group = $this->getEntity();
-    $status = $migration_group->save();
+    $migration = $this->getEntity();
+    $status = $migration->save();
 
     if ($status == SAVED_UPDATED) {
       // If we edited an existing entity...
-      drupal_set_message($this->t('Migration group %label has been updated.', array('%label' => $migration_group->label())));
+      drupal_set_message($this->t('Migration %label has been updated.', array('%label' => $migration->label())));
     }
     else {
       // If we created a new entity...
-      drupal_set_message($this->t('Migration group %label has been added.', array('%label' => $migration_group->label())));
+      drupal_set_message($this->t('Migration %label has been added.', array('%label' => $migration->label())));
     }
 
     // Redirect the user back to the listing route after the save operation.
-    $form_state->setRedirect('entity.migration_group.list');
+    $form_state->setRedirect('entity.migration.list',
+      array('migration_group' => $migration->get('migration_group')));
   }
 
 }
