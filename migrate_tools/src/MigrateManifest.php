@@ -8,6 +8,7 @@
 namespace Drupal\migrate_tools;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\migrate\Entity\Migration;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
@@ -54,38 +55,50 @@ class MigrateManifest {
     }
   }
 
+  /**
+   * Drush execution method. Runs imports on the supplied manifest.
+   */
   public function import() {
+    /** @var \Drupal\migrate\MigrateTemplateStorage $template_storage */
+    $template_storage = \Drupal::service('migrate.template_storage');
 
     $this->setupLegacyDb();
-    $migration_ids = array();
-    $migrations = array();
+    $migration_ids = [];
+    $migrations = [];
 
-    // Parse out the migration ids into an array for loading.
-    $entity_type = \Drupal::entityManager()->getDefinition('migration');
-    $prefix = $entity_type->getConfigPrefix();
     foreach ($this->migrationList as $migration_info) {
       if (is_array($migration_info)) {
         // The migration is stored as the key in the info array.
         $migration_id = key($migration_info);
-        $config_name = "$prefix.$migration_id";
-
-        // If there is some existing global overrides then we merge them in.
-        if (isset($GLOBALS['config'][$config_name])) {
-          $migration_info = NestedArray::mergeDeep($GLOBALS['config'][$config_name], $migration_info);
-        }
-        \Drupal::config($config_name)->setSettingsOverride($migration_info);
       }
       else {
         // If it wasn't an array then the info is just the migration_id.
         $migration_id = $migration_info;
       }
       $migration_ids[] = $migration_id;
-    }
 
+      $template = $template_storage->getTemplateByName($migration_id) ?: [];
+      if (is_array($migration_info)) {
+        // If there is some existing global overrides then we merge them in.
+        if (isset($GLOBALS['config'][$migration_id])) {
+          $migration_info = NestedArray::mergeDeep($GLOBALS['config'][$migration_id], $migration_info);
+        }
+
+        $migration_info = NestedArray::mergeDeep($template, $migration_info);
+      }
+      else {
+        $migration_info = $template;
+      }
+
+      if (!Migration::load($migration_id)) {
+        $migration = Migration::create($migration_info);
+        $migration->save();
+      }
+    }
 
     // Load all the migrations at once so they're correctly ordered.
     foreach (entity_load_multiple('migration', $migration_ids) as $migration) {
-      $executable = $this->importSingle($migration);
+      $executable = $this->executeMigration($migration);
       // Store all the migrations for later.
       $migrations[$migration->id()] = array(
         'executable' => $executable,
@@ -107,7 +120,7 @@ class MigrateManifest {
   }
 
   /**
-   * Import a single migration.
+   * Execute a single migration.
    *
    * @param \Drupal\migrate\Entity\Migration $migration
    *   The migration to run.
@@ -115,7 +128,7 @@ class MigrateManifest {
    * @return \Drupal\migrate\MigrateExecutable
    *   The migration executable.
    */
-  protected function importSingle($migration) {
+  protected function executeMigration($migration) {
     drush_log('Running ' . $migration->id(), 'ok');
     $executable = new MigrateExecutable($migration, $this->log);
     // drush_op() provides --simulate support.
