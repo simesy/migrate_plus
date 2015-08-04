@@ -12,7 +12,6 @@ use Drupal\migrate\Entity\Migration;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
-use Drupal\migrate\MigrateExecutable;
 use Drupal\Core\Database\Database;
 
 class MigrateManifest {
@@ -125,7 +124,7 @@ class MigrateManifest {
    * @param \Drupal\migrate\Entity\Migration $migration
    *   The migration to run.
    *
-   * @return \Drupal\migrate\MigrateExecutable
+   * @return \Drupal\migrate_tools\MigrateExecutable
    *   The migration executable.
    */
   protected function executeMigration($migration) {

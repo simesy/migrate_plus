@@ -15,6 +15,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Routing\CurrentRouteMatch;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Datetime\DateFormatter;
 
 /**
  * Provides a listing of migration entities in a given group.
@@ -68,6 +69,7 @@ class MigrationListBuilder extends ConfigEntityListBuilder implements EntityHand
     $header['total'] = $this->t('Total');
     $header['imported'] = $this->t('Imported');
     $header['unprocessed'] = $this->t('Unprocessed');
+    $header['last_imported'] = $this->t('Last Imported');
     return $header + parent::buildHeader();
   }
 
@@ -99,7 +101,17 @@ class MigrationListBuilder extends ConfigEntityListBuilder implements EntityHand
     else {
       $row['unprocessed'] = $row['total'] - $map->processedCount();
     }
-
+    $migrate_last_imported_store = \Drupal::keyValue('migrate_last_imported');
+    $last_imported =  $migrate_last_imported_store->get($migration->id(), FALSE);
+    if ($last_imported) {
+      /** @var DateFormatter $date_formatter */
+      $date_formatter = \Drupal::service('date.formatter');
+      $row['last_imported'] = $date_formatter->format($last_imported / 1000,
+        'custom', 'Y-m-d H:i:s');
+    }
+    else {
+      $row['last_imported'] = '';
+    }
     return $row + parent::buildRow($migration);
   }
 

@@ -7,9 +7,10 @@
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\migrate\Entity\MigrationInterface;
-use Drupal\migrate\MigrateExecutable;
+use Drupal\migrate_tools\MigrateExecutable;
 use Drupal\migrate_tools\DrushLogMigrateMessage;
 use Drupal\migrate_tools\MigrateManifest;
+use Drupal\Core\Datetime\DateFormatter;
 
 /**
  * Implements hook_drush_command().
@@ -38,6 +39,7 @@ function migrate_tools_drush_command() {
     'options' => array(
       'all' => 'Process all migrations.',
       'group' => 'Name of the migration group to import',
+      'feedback' => 'Frequency of progress messages, in items processed',
     ),
     'arguments' => array(
       'migration' => 'Name of migration(s) to import. Delimit multiple using commas.',
@@ -92,6 +94,7 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
         dt('Total'),
         dt('Imported'),
         dt('Unprocessed'),
+        dt('Last imported'),
       );
     }
     foreach ($migration_list as $migration_id => $migration) {
@@ -125,7 +128,18 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
         $table[] = array($migration_id);
       }
       else {
-        $table[] = array($migration_id, $source_rows, $imported, $unprocessed);
+        $migrate_last_imported_store = \Drupal::keyValue('migrate_last_imported');
+        $last_imported =  $migrate_last_imported_store->get($migration->id(), FALSE);
+        if ($last_imported) {
+          /** @var DateFormatter $date_formatter */
+          $date_formatter = \Drupal::service('date.formatter');
+          $last_imported = $date_formatter->format($last_imported / 1000,
+            'custom', 'Y-m-d H:i:s');
+        }
+        else {
+          $last_imported = '';
+        }
+        $table[] = array($migration_id, $source_rows, $imported, $unprocessed, $last_imported);
       }
     }
   }
@@ -138,9 +152,14 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
 function drush_migrate_tools_migrate_import($migration_names = '') {
   $group_name = drush_get_option('group');
   $all = drush_get_option('all');
+  $options = [];
   if (!$all && !$group_name && !$migration_names) {
     drush_set_error('MIGRATE_ERROR', dt('You must specify --all, --group, or one or more migration names separated by commas'));
     return;
+  }
+
+  if (drush_get_option('feedback')) {
+    $options['feedback'] = drush_get_option('feedback');
   }
 
   $log = new DrushLogMigrateMessage();
@@ -150,7 +169,7 @@ function drush_migrate_tools_migrate_import($migration_names = '') {
   // Take it one group at a time, importing the migrations within each group.
   foreach ($migrations as $group_id => $migration_list) {
     foreach ($migration_list as $migration_id => $migration) {
-      $executable = new MigrateExecutable($migration, $log);
+      $executable = new MigrateExecutable($migration, $log, $options);
       // drush_op() provides --simulate support.
       drush_op(array($executable, 'import'));
     }
