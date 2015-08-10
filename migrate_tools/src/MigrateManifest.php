@@ -89,7 +89,7 @@ class MigrateManifest {
         $migration_info = $template;
       }
 
-      if (!Migration::load($migration_id)) {
+      if ($migration_info && !Migration::load($migration_id)) {
         $migration = Migration::create($migration_info);
         $migration->save();
       }
