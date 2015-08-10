@@ -7,6 +7,7 @@
 
 namespace Drupal\migrate_tools;
 
+use Drupal\migrate\Event\MigratePreRowSaveEvent;
 use Drupal\migrate\MigrateExecutable as MigrateExecutableBase;
 use Drupal\migrate\MigrateMessageInterface;
 use Drupal\migrate\Entity\MigrationInterface;
@@ -61,6 +62,13 @@ class MigrateExecutable extends MigrateExecutableBase {
   protected $counter = 0;
 
   /**
+   * Whether the destination item exists before saving.
+   *
+   * @var bool
+   */
+  protected $preExistingItem = FALSE;
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(MigrationInterface $migration, MigrateMessageInterface $message, array $options = []) {
@@ -74,8 +82,10 @@ class MigrateExecutable extends MigrateExecutableBase {
       array($this, 'onMapDelete'));
     \Drupal::service('event_dispatcher')->addListener(MigrateEvents::POST_IMPORT,
       array($this, 'onPostImport'));
+    \Drupal::service('event_dispatcher')->addListener(MigrateEvents::PRE_ROW_SAVE,
+      array($this, 'onPreRowSave'));
     \Drupal::service('event_dispatcher')->addListener(MigrateEvents::POST_ROW_SAVE,
-      array($this, 'onPostSave'));
+      array($this, 'onPostRowSave'));
   }
 
   /**
@@ -86,7 +96,14 @@ class MigrateExecutable extends MigrateExecutableBase {
    */
   public function onMapSave(MigrateMapSaveEvent $event) {
     $fields = $event->getFields();
-    $this->saveCounters[$fields['source_row_status']]++;
+    // Distinguish between creation and update.
+    if ($fields['source_row_status'] == MigrateIdMapInterface::STATUS_IMPORTED &&
+        $this->preExistingItem) {
+      $this->saveCounters[MigrateIdMapInterface::STATUS_NEEDS_UPDATE]++;
+    }
+    else {
+      $this->saveCounters[$fields['source_row_status']]++;
+    }
   }
 
   /**
@@ -100,12 +117,21 @@ class MigrateExecutable extends MigrateExecutableBase {
   }
 
   /**
-   * Return the number of items imported.
+   * Return the number of items created.
    *
    * @return int
    */
-  public function getImportedCount() {
+  public function getCreatedCount() {
     return $this->saveCounters[MigrateIdMapInterface::STATUS_IMPORTED];
+  }
+
+  /**
+   * Return the number of items updated.
+   *
+   * @return int
+   */
+  public function getUpdatedCount() {
+    return $this->saveCounters[MigrateIdMapInterface::STATUS_NEEDS_UPDATE];
   }
 
   /**
@@ -135,6 +161,7 @@ class MigrateExecutable extends MigrateExecutableBase {
    */
   public function getProcessedCount() {
     return $this->saveCounters[MigrateIdMapInterface::STATUS_IMPORTED] +
+      $this->saveCounters[MigrateIdMapInterface::STATUS_NEEDS_UPDATE] +
       $this->saveCounters[MigrateIdMapInterface::STATUS_IGNORED] +
       $this->saveCounters[MigrateIdMapInterface::STATUS_FAILED];
   }
@@ -179,20 +206,37 @@ class MigrateExecutable extends MigrateExecutableBase {
   protected function progressMessage($done = TRUE) {
     $processed = $this->getProcessedCount();
     if ($done) {
-      $singular_message = "Processed 1 item (!successes successfully, !failures failed, !ignored ignored) - done with '!name'";
-      $plural_message = "Processed !numitems items (!successes successfully, !failures failed, !ignored ignored) - done with '!name'";
+      $singular_message = "Processed 1 item (!created created, !updated updated, !failures failed, !ignored ignored) - done with '!name'";
+      $plural_message = "Processed !numitems items (!created created, !updated updated, !failures failed, !ignored ignored) - done with '!name'";
     }
     else {
-      $singular_message = "Processed 1 item (!successes successfully, !failures failed, !ignored ignored) - continuing with '!name'";
-      $plural_message = "Processed !numitems items (!successes successfully, !failures failed, !ignored ignored) - continuing with '!name'";
+      $singular_message = "Processed 1 item (!created created, !updated updated, !failures failed, !ignored ignored) - continuing with '!name'";
+      $plural_message = "Processed !numitems items (!created created, !updated updated, !failures failed, !ignored ignored) - continuing with '!name'";
     }
     $this->message->display(\Drupal::translation()->formatPlural($processed,
       $singular_message, $plural_message,
         array('!numitems' => $processed,
-              '!successes' => $this->getImportedCount(),
+              '!created' => $this->getCreatedCount(),
+              '!updated' => $this->getUpdatedCount(),
               '!failures' => $this->getFailedCount(),
               '!ignored' => $this->getIgnoredCount(),
               '!name' => $this->migration->id())));
+  }
+
+  /**
+   * React to an item about to be imported.
+   *
+   * @param \Drupal\migrate\Event\MigratePreRowSaveEvent $event
+   *   The pre-save event.
+   */
+  public function onPreRowSave(MigratePreRowSaveEvent $event) {
+    $id_map = $event->getRow()->getIdMap();
+    if (!empty($id_map['destid1'])) {
+      $this->preExistingItem = TRUE;
+    }
+    else {
+      $this->preExistingItem = FALSE;
+    }
   }
 
   /**
@@ -201,7 +245,7 @@ class MigrateExecutable extends MigrateExecutableBase {
    * @param \Drupal\migrate\Event\MigratePostRowSaveEvent $event
    *   The post-save event.
    */
-  public function onPostSave(MigratePostRowSaveEvent $event) {
+  public function onPostRowSave(MigratePostRowSaveEvent $event) {
     if ($this->feedback && ($this->counter) && $this->counter % $this->feedback == 0) {
       $this->progressMessage(FALSE);
       $this->resetCounters();

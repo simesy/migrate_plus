@@ -40,6 +40,7 @@ function migrate_tools_drush_command() {
       'all' => 'Process all migrations.',
       'group' => 'Name of the migration group to import',
       'feedback' => 'Frequency of progress messages, in items processed',
+      'update' => ' In addition to processing unprocessed items from the source, update previously-imported items with the current data',
     ),
     'arguments' => array(
       'migration' => 'Name of migration(s) to import. Delimit multiple using commas.',
@@ -162,6 +163,8 @@ function drush_migrate_tools_migrate_import($migration_names = '') {
     $options['feedback'] = drush_get_option('feedback');
   }
 
+  $update = drush_get_option('update');
+
   $log = new DrushLogMigrateMessage();
 
   $migrations = drush_migrate_tools_migration_list($group_name, $migration_names);
@@ -169,6 +172,9 @@ function drush_migrate_tools_migrate_import($migration_names = '') {
   // Take it one group at a time, importing the migrations within each group.
   foreach ($migrations as $group_id => $migration_list) {
     foreach ($migration_list as $migration_id => $migration) {
+      if ($update) {
+        $migration->getIdMap()->prepareUpdate();
+      }
       $executable = new MigrateExecutable($migration, $log, $options);
       // drush_op() provides --simulate support.
       drush_op(array($executable, 'import'));
