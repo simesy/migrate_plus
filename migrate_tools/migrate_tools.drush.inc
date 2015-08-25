@@ -41,6 +41,7 @@ function migrate_tools_drush_command() {
       'group' => 'Name of the migration group to import',
       'feedback' => 'Frequency of progress messages, in items processed',
       'update' => ' In addition to processing unprocessed items from the source, update previously-imported items with the current data',
+      'force' => 'Force an operation to run, even if all dependencies are not satisfied',
     ),
     'arguments' => array(
       'migration' => 'Name of migration(s) to import. Delimit multiple using commas.',
@@ -183,6 +184,7 @@ function drush_migrate_tools_migrate_import($migration_names = '') {
   }
 
   $update = drush_get_option('update');
+  $force = drush_get_option('force');
 
   $log = new DrushLogMigrateMessage();
 
@@ -191,6 +193,9 @@ function drush_migrate_tools_migrate_import($migration_names = '') {
   // Take it one group at a time, importing the migrations within each group.
   foreach ($migrations as $group_id => $migration_list) {
     foreach ($migration_list as $migration_id => $migration) {
+      if ($force) {
+        $migration->set('requirements', []);
+      }
       if ($update) {
         $migration->getIdMap()->prepareUpdate();
       }
