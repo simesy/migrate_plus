@@ -73,6 +73,9 @@ class MigrateExecutable extends MigrateExecutableBase {
    */
   public function __construct(MigrationInterface $migration, MigrateMessageInterface $message, array $options = []) {
     parent::__construct($migration, $message);
+    if (isset($options['limit'])) {
+      $this->itemLimit = $options['limit'];
+    }
     if (isset($options['feedback'])) {
       $this->feedback = $options['feedback'];
     }
@@ -251,6 +254,9 @@ class MigrateExecutable extends MigrateExecutableBase {
       $this->resetCounters();
     }
     $this->counter++;
+    if ($this->itemLimit && $this->counter >= $this->itemLimit) {
+      $event->getMigration()->interruptMigration(MigrationInterface::RESULT_COMPLETED);
+    }
   }
 
 }

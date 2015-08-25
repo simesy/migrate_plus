@@ -39,6 +39,7 @@ function migrate_tools_drush_command() {
     'options' => array(
       'all' => 'Process all migrations.',
       'group' => 'Name of the migration group to import',
+      'limit' => 'Limit on the number of items to process in each migration',
       'feedback' => 'Frequency of progress messages, in items processed',
       'update' => ' In addition to processing unprocessed items from the source, update previously-imported items with the current data',
       'force' => 'Force an operation to run, even if all dependencies are not satisfied',
@@ -50,6 +51,7 @@ function migrate_tools_drush_command() {
       'migrate-import --all' => 'Perform all migrations',
       'migrate-import --group=beer' => 'Import all migrations in the beer group',
       'migrate-import BeerTerm,BeerNode' => 'Import new terms and nodes',
+      'migrate-import BeerUser --limit=2' => 'Import no more than 2 users',
     ),
     'drupal dependencies' => array('migrate_tools'),
     'aliases' => array('mi'),
@@ -179,6 +181,9 @@ function drush_migrate_tools_migrate_import($migration_names = '') {
     return;
   }
 
+  if (drush_get_option('limit')) {
+    $options['limit'] = drush_get_option('limit');
+  }
   if (drush_get_option('feedback')) {
     $options['feedback'] = drush_get_option('feedback');
   }
