@@ -6,6 +6,7 @@
  */
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\migrate\Entity\Migration;
 use Drupal\migrate\Entity\MigrationInterface;
 use Drupal\migrate_tools\MigrateExecutable;
 use Drupal\migrate_tools\DrushLogMigrateMessage;
@@ -55,6 +56,15 @@ function migrate_tools_drush_command() {
     ),
     'drupal dependencies' => array('migrate_tools'),
     'aliases' => array('mi'),
+  );
+
+  $items['migrate-stop'] = array(
+    'description' => 'Stop an active migration operation.',
+    'arguments' => array(
+      'migration' => 'Name of migration to stop',
+    ),
+    'drupal dependencies' => array('migrate_tools'),
+    'aliases' => array('mst'),
   );
 
   $items['migrate-manifest'] = array(
@@ -208,6 +218,35 @@ function drush_migrate_tools_migrate_import($migration_names = '') {
       // drush_op() provides --simulate support.
       drush_op(array($executable, 'import'));
     }
+  }
+}
+
+/**
+ * @param string $migration_id
+ */
+function drush_migrate_tools_migrate_stop($migration_id = '') {
+  /** @var Migration $migration */
+  $migration = Migration::load($migration_id);
+  if ($migration) {
+    $status = $migration->getStatus();
+    switch ($status) {
+      case MigrationInterface::STATUS_IDLE:
+        drush_log(dt('Migration !id is idle', ['!id' => $migration_id]), 'warning');
+        break;
+      case MigrationInterface::STATUS_DISABLED:
+        drush_log(dt('Migration !id is disabled', ['!id' => $migration_id]), 'warning');
+        break;
+      case MigrationInterface::STATUS_STOPPING:
+        drush_log(dt('Migration !id is already stopping', ['!id' => $migration_id]), 'warning');
+        break;
+      default:
+        $migration->interruptMigration(MigrationInterface::RESULT_STOPPED);
+        drush_log(dt('Migration !id requested to stop', ['!id' => $migration_id]), 'success');
+        break;
+    }
+  }
+  else {
+    drush_log(dt('Migration !id does not exist', ['!id' => $migration_id]), 'error');
   }
 }
 
