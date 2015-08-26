@@ -11,12 +11,15 @@ use Drupal\migrate\Event\MigratePreRowSaveEvent;
 use Drupal\migrate\MigrateExecutable as MigrateExecutableBase;
 use Drupal\migrate\MigrateMessageInterface;
 use Drupal\migrate\Entity\MigrationInterface;
+use Drupal\migrate\MigrateSkipRowException;
 use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\migrate\Event\MigrateEvents;
+use Drupal\migrate_plus\Event\MigrateEvents as MigratePlusEvents;
 use Drupal\migrate\Event\MigrateMapSaveEvent;
 use Drupal\migrate\Event\MigrateMapDeleteEvent;
 use Drupal\migrate\Event\MigrateImportEvent;
 use Drupal\migrate\Event\MigratePostRowSaveEvent;
+use Drupal\migrate_plus\Event\MigratePrepareRowEvent;
 
 class MigrateExecutable extends MigrateExecutableBase {
 
@@ -56,6 +59,13 @@ class MigrateExecutable extends MigrateExecutableBase {
   protected $feedback = 0;
 
   /**
+   * List of specific source IDs to import.
+   *
+   * @var array
+   */
+  protected $idlist = [];
+
+  /**
    * Count of number of items processed so far in this migration.
    * @var int
    */
@@ -79,6 +89,9 @@ class MigrateExecutable extends MigrateExecutableBase {
     if (isset($options['feedback'])) {
       $this->feedback = $options['feedback'];
     }
+    if (isset($options['idlist'])) {
+      $this->idlist = explode(',', $options['idlist']);
+    }
     \Drupal::service('event_dispatcher')->addListener(MigrateEvents::MAP_SAVE,
       array($this, 'onMapSave'));
     \Drupal::service('event_dispatcher')->addListener(MigrateEvents::MAP_DELETE,
@@ -89,6 +102,8 @@ class MigrateExecutable extends MigrateExecutableBase {
       array($this, 'onPreRowSave'));
     \Drupal::service('event_dispatcher')->addListener(MigrateEvents::POST_ROW_SAVE,
       array($this, 'onPostRowSave'));
+    \Drupal::service('event_dispatcher')->addListener(MigratePlusEvents::PREPARE_ROW,
+      array($this, 'onPrepareRow'));
   }
 
   /**
@@ -256,6 +271,22 @@ class MigrateExecutable extends MigrateExecutableBase {
     $this->counter++;
     if ($this->itemLimit && $this->counter >= $this->itemLimit) {
       $event->getMigration()->interruptMigration(MigrationInterface::RESULT_COMPLETED);
+    }
+  }
+
+  /**
+   * React to a new row.
+   *
+   * @param \Drupal\migrate_plus\Event\MigratePrepareRowEvent $event
+   *   The prepare-row event.
+   */
+  public function onPrepareRow(MigratePrepareRowEvent $event) {
+    if ($this->idlist) {
+      $row = $event->getRow();
+      $source_id = $row->getSourceIdValues();
+      if (!in_array(reset($source_id), $this->idlist)) {
+        throw new MigrateSkipRowException(NULL, FALSE);
+      }
     }
   }
 

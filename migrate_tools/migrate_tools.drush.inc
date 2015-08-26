@@ -42,6 +42,7 @@ function migrate_tools_drush_command() {
       'group' => 'Name of the migration group to import',
       'limit' => 'Limit on the number of items to process in each migration',
       'feedback' => 'Frequency of progress messages, in items processed',
+      'idlist' => 'Comma-separated list of IDs to import',
       'update' => ' In addition to processing unprocessed items from the source, update previously-imported items with the current data',
       'force' => 'Force an operation to run, even if all dependencies are not satisfied',
     ),
@@ -53,6 +54,7 @@ function migrate_tools_drush_command() {
       'migrate-import --group=beer' => 'Import all migrations in the beer group',
       'migrate-import BeerTerm,BeerNode' => 'Import new terms and nodes',
       'migrate-import BeerUser --limit=2' => 'Import no more than 2 users',
+      'migrate-import BeerUser --idlist=5' => 'Import the user record with source ID 5',
     ),
     'drupal dependencies' => array('migrate_tools'),
     'aliases' => array('mi'),
@@ -197,7 +199,9 @@ function drush_migrate_tools_migrate_import($migration_names = '') {
   if (drush_get_option('feedback')) {
     $options['feedback'] = drush_get_option('feedback');
   }
-
+  if (drush_get_option('idlist')) {
+    $options['idlist'] = drush_get_option('idlist');
+  }
   $update = drush_get_option('update');
   $force = drush_get_option('force');
 
