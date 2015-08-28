@@ -116,6 +116,18 @@ class MigrationListBuilder extends ConfigEntityListBuilder implements EntityHand
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function load() {
+    $entity_ids = $this->getEntityIds();
+    // We're already sorting the entities properly in loadMultiple, and
+    // ConfigEntityListBuilder's load() messes it up with an extra sort(). So,
+    // simply take the entities in the order loaded.
+    $entities = $this->storage->loadMultipleOverrideFree($entity_ids);
+    return $entities;
+  }
+
+  /**
    * Retrieve the migrations belonging to the appropriate group.
    *
    * @return array
