@@ -6,7 +6,11 @@
  */
 
 use Drupal\migrate\Entity\MigrationInterface;
-use Drupal\migrate_plus\Entity\MigrationGroupInterface;
+use Drupal\migrate\Plugin\MigrateSourceInterface;
+use Drupal\migrate\Row;
+use Drupal\migrate_plus\Entity\MigrationGroup;
+use Drupal\migrate_plus\Event\MigrateEvents;
+use Drupal\migrate_plus\Event\MigratePrepareRowEvent;
 
 /**
  * Implements hook_config_schema_info_alter().
@@ -29,8 +33,7 @@ function migrate_plus_migration_load($migrations) {
   foreach ($migrations as $migration) {
     // If we are pointing to a valid group, merge its properties into ours.
     if (isset($migration->migration_group)) {
-      /** @var MigrationGroupInterface $group */
-      $group = entity_load('migration_group', $migration->migration_group);
+      $group = MigrationGroup::load($migration->migration_group);
       if ($group) {
         $shared_configuration = $group->get('shared_configuration');
         if ($shared_configuration) {
@@ -55,4 +58,13 @@ function migrate_plus_migration_load($migrations) {
       }
     }
   }
+}
+
+/**
+ * Implement hook_migrate_prepare_row().
+ */
+function migrate_plus_migrate_prepare_row(Row $row, MigrateSourceInterface $source, MigrationInterface $migration) {
+  // We will not encourage unnecessary coupling to Migration entities by passing
+  // them on.
+  \Drupal::service('event_dispatcher')->dispatch(MigrateEvents::PREPARE_ROW, new MigratePrepareRowEvent($row, $source));
 }
