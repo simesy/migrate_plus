@@ -17,27 +17,27 @@ use Drupal\Core\Datetime\DateFormatter;
  * Implements hook_drush_command().
  */
 function migrate_tools_drush_command() {
-  $items['migrate-status'] = array(
+  $items['migrate-status'] = [
     'description' => 'List all migrations with current status.',
-    'options' => array(
+    'options' => [
       'group' => 'Name of the migration group to list',
       'names-only' => 'Only return names, not all the details (faster)',
-    ),
-    'arguments' => array(
+    ],
+    'arguments' => [
       'migration' => 'Restrict to a comma-separated list of migrations. Optional',
-    ),
-    'examples' => array(
+    ],
+    'examples' => [
       'migrate-status' => 'Retrieve status for all migrations',
       'migrate-status --group=beer' => 'Retrieve status for all migrations in a given group',
       'migrate-status BeerTerm,BeerNode' => 'Retrieve status for specific migrations',
-    ),
-    'drupal dependencies' => array('migrate_tools'),
-    'aliases' => array('ms'),
-  );
+    ],
+    'drupal dependencies' => ['migrate_tools'],
+    'aliases' => ['ms'],
+  ];
 
-  $items['migrate-import'] = array(
+  $items['migrate-import'] = [
     'description' => 'Perform one or more migration processes.',
-    'options' => array(
+    'options' => [
       'all' => 'Process all migrations.',
       'group' => 'Name of the migration group to import',
       'limit' => 'Limit on the number of items to process in each migration',
@@ -45,45 +45,61 @@ function migrate_tools_drush_command() {
       'idlist' => 'Comma-separated list of IDs to import',
       'update' => ' In addition to processing unprocessed items from the source, update previously-imported items with the current data',
       'force' => 'Force an operation to run, even if all dependencies are not satisfied',
-    ),
-    'arguments' => array(
+    ],
+    'arguments' => [
       'migration' => 'Name of migration(s) to import. Delimit multiple using commas.',
-    ),
-    'examples' => array(
+    ],
+    'examples' => [
       'migrate-import --all' => 'Perform all migrations',
       'migrate-import --group=beer' => 'Import all migrations in the beer group',
       'migrate-import BeerTerm,BeerNode' => 'Import new terms and nodes',
       'migrate-import BeerUser --limit=2' => 'Import no more than 2 users',
       'migrate-import BeerUser --idlist=5' => 'Import the user record with source ID 5',
-    ),
-    'drupal dependencies' => array('migrate_tools'),
-    'aliases' => array('mi'),
-  );
+    ],
+    'drupal dependencies' => ['migrate_tools'],
+    'aliases' => ['mi'],
+  ];
 
-  $items['migrate-stop'] = array(
+  $items['migrate-stop'] = [
     'description' => 'Stop an active migration operation.',
-    'arguments' => array(
+    'arguments' => [
       'migration' => 'Name of migration to stop',
-    ),
-    'drupal dependencies' => array('migrate_tools'),
-    'aliases' => array('mst'),
-  );
+    ],
+    'drupal dependencies' => ['migrate_tools'],
+    'aliases' => ['mst'],
+  ];
 
-  $items['migrate-manifest'] = array(
+  $items['migrate-manifest'] = [
     'description' => 'Execute the migrations as specified in a manifest file.',
-    'arguments' => array(
+    'arguments' => [
       'manifest' => 'The path to the manifest file',
-    ),
+    ],
     'required-arguments' => 1,
-    'options' => array(
-      'legacy-db-url' => array(
+    'options' => [
+      'legacy-db-url' => [
         'description' => 'A Drupal 6 style database URL.',
         'example-value' => 'mysql://root:pass@127.0.0.1/db',
         'required' => TRUE,
-      ),
-    ),
-    'drupal dependencies' => array('migrate_tools'),
-  );
+      ],
+    ],
+    'drupal dependencies' => ['migrate_tools'],
+  ];
+
+  $items['migrate-messages'] = [
+    'description' => 'View any messages associated with a migration.',
+    'arguments' => [
+      'migration' => 'Name of the migration',
+    ],
+    'options' => [
+      'csv' => 'Export messages as a CSV'
+    ],
+    'examples' => [
+      'migrate-messages MyNode' => 'Show all messages for the MyNode migration',
+    ],
+    'drupal dependencies' => ['migrate_tools'],
+    'aliases' => ['mmsg'],
+  ];
+
   return $items;
 }
 
@@ -96,23 +112,23 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
 
   $migrations = drush_migrate_tools_migration_list($group_name, $migration_names);
 
-  $table = array();
+  $table = [];
   // Take it one group at a time, listing the migrations within each group.
   foreach ($migrations as $group_id => $migration_list) {
     if ($names_only) {
-      $table[] = array(
+      $table[] = [
         dt('Group: !name', array('!name' => $group_id))
-      );
+      ];
     }
     else {
-      $table[] = array(
+      $table[] = [
         dt('Group: !name', array('!name' => $group_id)),
         dt('Total'),
         dt('Imported'),
         dt('Unprocessed'),
         dt('Status'),
         dt('Last imported'),
-      );
+      ];
     }
     foreach ($migration_list as $migration_id => $migration) {
       try {
@@ -136,13 +152,13 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
       }
       catch (Exception $e) {
         drush_log(dt('Could not retrieve source count from !migration',
-                      array('!migration' => $migration_id)));
+                      ['!migration' => $migration_id]));
         $source_rows = dt('N/A');
         $unprocessed = dt('N/A');
       }
 
       if ($names_only) {
-        $table[] = array($migration_id);
+        $table[] = [$migration_id];
       }
       else {
         $status = $migration->getStatus();
@@ -174,7 +190,7 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
         else {
           $last_imported = '';
         }
-        $table[] = array($migration_id, $source_rows, $imported, $unprocessed, $status, $last_imported);
+        $table[] = [$migration_id, $source_rows, $imported, $unprocessed, $status, $last_imported];
       }
     }
   }
@@ -220,7 +236,7 @@ function drush_migrate_tools_migrate_import($migration_names = '') {
       }
       $executable = new MigrateExecutable($migration, $log, $options);
       // drush_op() provides --simulate support.
-      drush_op(array($executable, 'import'));
+      drush_op([$executable, 'import']);
     }
   }
 }
@@ -247,6 +263,51 @@ function drush_migrate_tools_migrate_stop($migration_id = '') {
         $migration->interruptMigration(MigrationInterface::RESULT_STOPPED);
         drush_log(dt('Migration !id requested to stop', ['!id' => $migration_id]), 'success');
         break;
+    }
+  }
+  else {
+    drush_log(dt('Migration !id does not exist', ['!id' => $migration_id]), 'error');
+  }
+}
+
+/**
+ * @param string $migration_id
+ */
+function drush_migrate_tools_migrate_messages($migration_id) {
+  /** @var Migration $migration */
+  $migration = Migration::load($migration_id);
+  if ($migration) {
+    $map = $migration->getIdMap();
+    $first = TRUE;
+    $table = [];
+    foreach ($map->getMessageIterator() as $row) {
+      unset($row->msgid);
+      if ($first) {
+        // @todo: Ideally, replace sourceid* with source key names. Or, should
+        // getMessageIterator() do that?
+        foreach ($row as $column => $value) {
+          $table[0][] = $column;
+        }
+        $first = FALSE;
+      }
+      $table[] = (array)$row;
+    }
+    if (empty($table)) {
+      drush_log(dt('No messages for this migration'), 'status');
+    }
+    else {
+      if (drush_get_option('csv')) {
+        foreach ($table as $row) {
+          fputcsv(STDOUT, $row);
+        }
+      }
+      else {
+        $widths = [];
+        foreach ($table[0] as $header) {
+          $widths[] = strlen($header) + 1;
+        }
+        drush_print_table($table, TRUE, $widths);
+      }
     }
   }
   else {
@@ -282,10 +343,10 @@ function drush_migrate_tools_migration_list($group_id = '', $migration_ids = '')
     $migration_ids = explode(',', Unicode::strtolower($migration_ids));
   }
   else {
-    $migration_ids = array();
+    $migration_ids = [];
   }
 
-  $return = array();
+  $return = [];
   foreach ($migrations as $migration_id => $migration) {
     if (empty($migration_ids) || in_array(Unicode::strtolower($migration_id), $migration_ids)) {
       $group_id = $migration->get('migration_group');
@@ -337,5 +398,5 @@ function drush_migrate_tools_migrate_manifest($manifest) {
     drush_set_error('MIGRATE_ERROR', $e->getMessage());
   }
 
-  drush_invoke_process('@self', 'cache-rebuild', array(), array(), FALSE);
+  drush_invoke_process('@self', 'cache-rebuild', [], [], FALSE);
 }
