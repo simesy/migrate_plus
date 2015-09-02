@@ -69,6 +69,15 @@ function migrate_tools_drush_command() {
     'aliases' => ['mst'],
   ];
 
+  $items['migrate-reset-status'] = [
+    'description' => 'Reset a active migration\'s status to idle.',
+    'arguments' => [
+      'migration' => 'Name of migration to reset',
+    ],
+    'drupal dependencies' => ['migrate_tools'],
+    'aliases' => ['mrs'],
+  ];
+
   $items['migrate-manifest'] = [
     'description' => 'Execute the migrations as specified in a manifest file.',
     'arguments' => [
@@ -263,6 +272,27 @@ function drush_migrate_tools_migrate_stop($migration_id = '') {
         $migration->interruptMigration(MigrationInterface::RESULT_STOPPED);
         drush_log(dt('Migration !id requested to stop', ['!id' => $migration_id]), 'success');
         break;
+    }
+  }
+  else {
+    drush_log(dt('Migration !id does not exist', ['!id' => $migration_id]), 'error');
+  }
+}
+
+/**
+ * @param string $migration_id
+ */
+function drush_migrate_tools_migrate_reset_status($migration_id = '') {
+  /** @var Migration $migration */
+  $migration = Migration::load($migration_id);
+  if ($migration) {
+    $status = $migration->getStatus();
+    if ($status == MigrationInterface::STATUS_IDLE) {
+      drush_log(dt('Migration !id is already Idle', ['!id' => $migration_id]), 'warning');
+    }
+    else {
+      $migration->setStatus(MigrationInterface::STATUS_IDLE);
+      drush_log(dt('Migration !id reset to Idle', ['!id' => $migration_id]), 'status');
     }
   }
   else {
