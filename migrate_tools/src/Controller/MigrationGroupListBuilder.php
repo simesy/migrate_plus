@@ -61,11 +61,11 @@ class MigrationGroupListBuilder extends ConfigEntityListBuilder {
    */
   public function getDefaultOperations(EntityInterface $entity) {
     $operations = parent::getDefaultOperations($entity);
-    $operations['list'] = array(
+    $operations['list'] = [
       'title' => $this->t('List migrations'),
       'weight' => 0,
       'url' => Url::fromRoute('entity.migration.list', ['migration_group' => $entity->id()]),
-    );
+    ];
 
     return $operations;
   }

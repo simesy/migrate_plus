@@ -69,3 +69,11 @@ entity.migration.delete_form:
     _entity_form: migration.delete
   requirements:
     _entity_access: migration.delete
+
+migrate_tools.messages:
+  path: '/admin/structure/migrate/manage/{migration_group}/migrations/{migration}/messages'
+  defaults:
+    _controller: '\Drupal\migrate_tools\Controller\MessageController::overview'
+    _title: 'Messages'
+  requirements:
+    _permission: 'administer migrations'

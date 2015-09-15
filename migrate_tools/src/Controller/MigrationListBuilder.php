@@ -70,6 +70,7 @@ class MigrationListBuilder extends ConfigEntityListBuilder implements EntityHand
     $header['total'] = $this->t('Total');
     $header['imported'] = $this->t('Imported');
     $header['unprocessed'] = $this->t('Unprocessed');
+    $header['messages'] = $this->t('Messages');
     $header['last_imported'] = $this->t('Last Imported');
     return $header + parent::buildHeader();
   }
@@ -86,7 +87,7 @@ class MigrationListBuilder extends ConfigEntityListBuilder implements EntityHand
    * @see Drupal\Core\Entity\EntityListController::render()
    */
   public function buildRow(MigrationInterface $migration) {
-    $row['label'] = $this->getLabel($migration);
+    $row['label'] = $migration->label();
     $row['machine_name'] = $migration->id();
     $row['status'] = $migration->getStatusLabel();
 
@@ -103,6 +104,12 @@ class MigrationListBuilder extends ConfigEntityListBuilder implements EntityHand
     else {
       $row['unprocessed'] = $row['total'] - $map->processedCount();
     }
+    $group = $migration->get('migration_group');
+    if (!$group) {
+      $group = 'default';
+    }
+    // @todo: This is most likely not a Best Practice (tm).
+    $row['messages']['data']['#markup'] = '<a href="/admin/structure/migrate/manage/' . $group . '/migrations/' . $migration->id() . '/messages">' . $map->messageCount() .'</a>';
     $migrate_last_imported_store = \Drupal::keyValue('migrate_last_imported');
     $last_imported =  $migrate_last_imported_store->get($migration->id(), FALSE);
     if ($last_imported) {
@@ -175,7 +182,7 @@ class MigrationListBuilder extends ConfigEntityListBuilder implements EntityHand
     if (!$migration_group) {
       $migration_group = 'default';
     }
-    $route_parameters = $url->getRouteParameters() + array('migration_group' => $migration_group);
+    $route_parameters = $url->getRouteParameters() + ['migration_group' => $migration_group];
     $url->setRouteParameters($route_parameters);
   }
 
