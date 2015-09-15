@@ -66,6 +66,7 @@ class MigrationListBuilder extends ConfigEntityListBuilder implements EntityHand
   public function buildHeader() {
     $header['label'] = $this->t('Migration');
     $header['machine_name'] = $this->t('Machine Name');
+    $header['status'] = $this->t('Status');
     $header['total'] = $this->t('Total');
     $header['imported'] = $this->t('Imported');
     $header['unprocessed'] = $this->t('Unprocessed');
@@ -87,6 +88,7 @@ class MigrationListBuilder extends ConfigEntityListBuilder implements EntityHand
   public function buildRow(MigrationInterface $migration) {
     $row['label'] = $this->getLabel($migration);
     $row['machine_name'] = $migration->id();
+    $row['status'] = $migration->getStatusLabel();
 
     // Derive the stats
     $source_plugin = $migration->getSourcePlugin();
@@ -134,9 +136,13 @@ class MigrationListBuilder extends ConfigEntityListBuilder implements EntityHand
    *   An array of entity IDs.
    */
   protected function getEntityIds() {
-    $query = $this->getStorage()->getQuery();
+    $query = $this->getStorage()->getQuery('OR');
     $keys = $this->entityType->getKeys();
     $migration_group = $this->currentRouteMatch->getParameter('migration_group');
+    // Add groupless migrations to the default group.
+    if ($migration_group == 'default') {
+      $query->notExists('migration_group');
+    }
     return $query
       ->condition('migration_group', $migration_group)
       ->sort($keys['id'])
@@ -149,8 +155,12 @@ class MigrationListBuilder extends ConfigEntityListBuilder implements EntityHand
    */
   public function getDefaultOperations(MigrationInterface $entity) {
     $operations = parent::getDefaultOperations($entity);
-    $this->addGroupParameter($operations['edit']['url'], $entity->get('migration_group'));
-    $this->addGroupParameter($operations['delete']['url'], $entity->get('migration_group'));
+    $migration_group = $entity->get('migration_group');
+    if (!$migration_group) {
+      $migration_group = 'default';
+    }
+    $this->addGroupParameter($operations['edit']['url'], $migration_group);
+    $this->addGroupParameter($operations['delete']['url'], $migration_group);
     return $operations;
   }
 
@@ -162,6 +172,9 @@ class MigrationListBuilder extends ConfigEntityListBuilder implements EntityHand
    *   The migration's parent group.
    */
   protected function addGroupParameter(Url $url, $migration_group) {
+    if (!$migration_group) {
+      $migration_group = 'default';
+    }
     $route_parameters = $url->getRouteParameters() + array('migration_group' => $migration_group);
     $url->setRouteParameters($route_parameters);
   }

@@ -132,10 +132,10 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
     else {
       $table[] = [
         dt('Group: !name', array('!name' => $group_id)),
+        dt('Status'),
         dt('Total'),
         dt('Imported'),
         dt('Unprocessed'),
-        dt('Status'),
         dt('Last imported'),
       ];
     }
@@ -170,8 +170,8 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
         $table[] = [$migration_id];
       }
       else {
-        $status = $migration->getStatus();
-        switch ($status) {
+        $status = $migration->getStatusLabel();
+/*        switch ($status) {
           case MigrationInterface::STATUS_IDLE:
             $status = dt('Idle');
             break;
@@ -187,7 +187,7 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
           default:
             $status = dt('Invalid');
             break;
-        }
+        }*/
         $migrate_last_imported_store = \Drupal::keyValue('migrate_last_imported');
         $last_imported =  $migrate_last_imported_store->get($migration->id(), FALSE);
         if ($last_imported) {
@@ -199,7 +199,7 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
         else {
           $last_imported = '';
         }
-        $table[] = [$migration_id, $source_rows, $imported, $unprocessed, $status, $last_imported];
+        $table[] = [$migration_id, $status, $source_rows, $imported, $unprocessed, $last_imported];
       }
     }
   }
