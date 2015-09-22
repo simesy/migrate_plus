@@ -78,6 +78,8 @@ class MigrateExecutable extends MigrateExecutableBase {
    */
   protected $preExistingItem = FALSE;
 
+  protected $listeners = [];
+
   /**
    * {@inheritdoc}
    */
@@ -92,18 +94,15 @@ class MigrateExecutable extends MigrateExecutableBase {
     if (isset($options['idlist'])) {
       $this->idlist = explode(',', $options['idlist']);
     }
-    \Drupal::service('event_dispatcher')->addListener(MigrateEvents::MAP_SAVE,
-      array($this, 'onMapSave'));
-    \Drupal::service('event_dispatcher')->addListener(MigrateEvents::MAP_DELETE,
-      array($this, 'onMapDelete'));
-    \Drupal::service('event_dispatcher')->addListener(MigrateEvents::POST_IMPORT,
-      array($this, 'onPostImport'));
-    \Drupal::service('event_dispatcher')->addListener(MigrateEvents::PRE_ROW_SAVE,
-      array($this, 'onPreRowSave'));
-    \Drupal::service('event_dispatcher')->addListener(MigrateEvents::POST_ROW_SAVE,
-      array($this, 'onPostRowSave'));
-    \Drupal::service('event_dispatcher')->addListener(MigratePlusEvents::PREPARE_ROW,
-      array($this, 'onPrepareRow'));
+    $this->listeners[MigrateEvents::MAP_SAVE] = array($this, 'onMapSave');
+    $this->listeners[MigrateEvents::MAP_DELETE] = array($this, 'onMapDelete');
+    $this->listeners[MigrateEvents::POST_IMPORT] = array($this, 'onPostImport');
+    $this->listeners[MigrateEvents::PRE_ROW_SAVE] = array($this, 'onPreRowSave');
+    $this->listeners[MigrateEvents::POST_ROW_SAVE] = array($this, 'onPostRowSave');
+    $this->listeners[MigratePlusEvents::PREPARE_ROW] = array($this, 'onPrepareRow');
+    foreach ($this->listeners as $event => $listener) {
+      \Drupal::service('event_dispatcher')->addListener($event, $listener);
+    }
   }
 
   /**
@@ -213,6 +212,9 @@ class MigrateExecutable extends MigrateExecutableBase {
     $migrate_last_imported_store = \Drupal::keyValue('migrate_last_imported');
     $migrate_last_imported_store->set($event->getMigration()->id(), round(microtime(TRUE) * 1000));
     $this->progressMessage();
+    foreach ($this->listeners as $event => $listener) {
+      \Drupal::service('event_dispatcher')->removeListener($event, $listener);
+    }
   }
 
   /**
