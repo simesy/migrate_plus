@@ -126,12 +126,12 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
   foreach ($migrations as $group_id => $migration_list) {
     if ($names_only) {
       $table[] = [
-        dt('Group: !name', array('!name' => $group_id))
+        dt('Group: @name', array('@name' => $group_id))
       ];
     }
     else {
       $table[] = [
-        dt('Group: !name', array('!name' => $group_id)),
+        dt('Group: @name', array('@name' => $group_id)),
         dt('Status'),
         dt('Total'),
         dt('Imported'),
@@ -160,8 +160,8 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
         }
       }
       catch (Exception $e) {
-        drush_log(dt('Could not retrieve source count from !migration',
-                      ['!migration' => $migration_id]));
+        drush_log(dt('Could not retrieve source count from @migration',
+                      ['@migration' => $migration_id]));
         $source_rows = dt('N/A');
         $unprocessed = dt('N/A');
       }
@@ -260,22 +260,22 @@ function drush_migrate_tools_migrate_stop($migration_id = '') {
     $status = $migration->getStatus();
     switch ($status) {
       case MigrationInterface::STATUS_IDLE:
-        drush_log(dt('Migration !id is idle', ['!id' => $migration_id]), 'warning');
+        drush_log(dt('Migration @id is idle', ['@id' => $migration_id]), 'warning');
         break;
       case MigrationInterface::STATUS_DISABLED:
-        drush_log(dt('Migration !id is disabled', ['!id' => $migration_id]), 'warning');
+        drush_log(dt('Migration @id is disabled', ['@id' => $migration_id]), 'warning');
         break;
       case MigrationInterface::STATUS_STOPPING:
-        drush_log(dt('Migration !id is already stopping', ['!id' => $migration_id]), 'warning');
+        drush_log(dt('Migration @id is already stopping', ['@id' => $migration_id]), 'warning');
         break;
       default:
         $migration->interruptMigration(MigrationInterface::RESULT_STOPPED);
-        drush_log(dt('Migration !id requested to stop', ['!id' => $migration_id]), 'success');
+        drush_log(dt('Migration @id requested to stop', ['@id' => $migration_id]), 'success');
         break;
     }
   }
   else {
-    drush_log(dt('Migration !id does not exist', ['!id' => $migration_id]), 'error');
+    drush_log(dt('Migration @id does not exist', ['@id' => $migration_id]), 'error');
   }
 }
 
@@ -288,15 +288,15 @@ function drush_migrate_tools_migrate_reset_status($migration_id = '') {
   if ($migration) {
     $status = $migration->getStatus();
     if ($status == MigrationInterface::STATUS_IDLE) {
-      drush_log(dt('Migration !id is already Idle', ['!id' => $migration_id]), 'warning');
+      drush_log(dt('Migration @id is already Idle', ['@id' => $migration_id]), 'warning');
     }
     else {
       $migration->setStatus(MigrationInterface::STATUS_IDLE);
-      drush_log(dt('Migration !id reset to Idle', ['!id' => $migration_id]), 'status');
+      drush_log(dt('Migration @id reset to Idle', ['@id' => $migration_id]), 'status');
     }
   }
   else {
-    drush_log(dt('Migration !id does not exist', ['!id' => $migration_id]), 'error');
+    drush_log(dt('Migration @id does not exist', ['@id' => $migration_id]), 'error');
   }
 }
 
@@ -341,7 +341,7 @@ function drush_migrate_tools_migrate_messages($migration_id) {
     }
   }
   else {
-    drush_log(dt('Migration !id does not exist', ['!id' => $migration_id]), 'error');
+    drush_log(dt('Migration @id does not exist', ['@id' => $migration_id]), 'error');
   }
 }
 

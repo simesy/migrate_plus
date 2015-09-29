@@ -226,21 +226,21 @@ class MigrateExecutable extends MigrateExecutableBase {
   protected function progressMessage($done = TRUE) {
     $processed = $this->getProcessedCount();
     if ($done) {
-      $singular_message = "Processed 1 item (!created created, !updated updated, !failures failed, !ignored ignored) - done with '!name'";
-      $plural_message = "Processed !numitems items (!created created, !updated updated, !failures failed, !ignored ignored) - done with '!name'";
+      $singular_message = "Processed 1 item (@created created, @updated updated, @failures failed, @ignored ignored) - done with '@name'";
+      $plural_message = "Processed @numitems items (@created created, @updated updated, @failures failed, @ignored ignored) - done with '@name'";
     }
     else {
-      $singular_message = "Processed 1 item (!created created, !updated updated, !failures failed, !ignored ignored) - continuing with '!name'";
-      $plural_message = "Processed !numitems items (!created created, !updated updated, !failures failed, !ignored ignored) - continuing with '!name'";
+      $singular_message = "Processed 1 item (@created created, @updated updated, @failures failed, @ignored ignored) - continuing with '@name'";
+      $plural_message = "Processed @numitems items (@created created, @updated updated, @failures failed, @ignored ignored) - continuing with '@name'";
     }
     $this->message->display(\Drupal::translation()->formatPlural($processed,
       $singular_message, $plural_message,
-        array('!numitems' => $processed,
-              '!created' => $this->getCreatedCount(),
-              '!updated' => $this->getUpdatedCount(),
-              '!failures' => $this->getFailedCount(),
-              '!ignored' => $this->getIgnoredCount(),
-              '!name' => $this->migration->id())));
+        array('@numitems' => $processed,
+              '@created' => $this->getCreatedCount(),
+              '@updated' => $this->getUpdatedCount(),
+              '@failures' => $this->getFailedCount(),
+              '@ignored' => $this->getIgnoredCount(),
+              '@name' => $this->migration->id())));
   }
 
   /**
