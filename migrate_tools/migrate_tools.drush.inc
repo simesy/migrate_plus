@@ -60,6 +60,25 @@ function migrate_tools_drush_command() {
     'aliases' => ['mi'],
   ];
 
+  $items['migrate-rollback'] = array(
+    'description' => 'Rollback one or more migrations.',
+    'options' => array(
+      'all' => 'Process all migrations.',
+      'group' => 'Name of the migration group to rollback',
+      'feedback' => 'Frequency of progress messages, in items processed',
+    ),
+    'arguments' => array(
+      'migration' => 'Name of migration(s) to rollback. Delimit multiple using commas.',
+    ),
+    'examples' => array(
+      'migrate-rollback --all' => 'Perform all migrations',
+      'migrate-rollback --group=beer' => 'Rollback all migrations in the beer group',
+      'migrate-rollback BeerTerm,BeerNode' => 'Rollback imported terms and nodes',
+    ),
+    'drupal dependencies' => array('migrate_tools'),
+    'aliases' => array('mr'),
+  );
+
   $items['migrate-stop'] = [
     'description' => 'Stop an active migration operation.',
     'arguments' => [
@@ -246,6 +265,38 @@ function drush_migrate_tools_migrate_import($migration_names = '') {
       $executable = new MigrateExecutable($migration, $log, $options);
       // drush_op() provides --simulate support.
       drush_op([$executable, 'import']);
+    }
+  }
+}
+
+/**
+ * @param string $migration_names
+ */
+function drush_migrate_tools_migrate_rollback($migration_names = '') {
+  $group_name = drush_get_option('group');
+  $all = drush_get_option('all');
+  $options = [];
+  if (!$all && !$group_name && !$migration_names) {
+    drush_set_error('MIGRATE_ERROR', dt('You must specify --all, --group, or one or more migration names separated by commas'));
+    return;
+  }
+
+  if (drush_get_option('feedback')) {
+    $options['feedback'] = drush_get_option('feedback');
+  }
+
+  $log = new DrushLogMigrateMessage();
+
+  $migrations = drush_migrate_tools_migration_list($group_name, $migration_names);
+
+  // Take it one group at a time, rolling back the migrations within each group.
+  foreach ($migrations as $group_id => $migration_list) {
+    // Roll back in reverse order.
+    $migration_list = array_reverse($migration_list);
+    foreach ($migration_list as $migration_id => $migration) {
+      $executable = new MigrateExecutable($migration, $log, $options);
+      // drush_op() provides --simulate support.
+      drush_op(array($executable, 'rollback'));
     }
   }
 }
