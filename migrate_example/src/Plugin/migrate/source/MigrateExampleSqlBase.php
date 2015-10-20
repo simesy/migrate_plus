@@ -25,7 +25,8 @@ abstract class MigrateExampleSqlBase extends SqlBase implements ContainerFactory
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $migration
+      $migration,
+      $container->get('state')
     );
   }
 

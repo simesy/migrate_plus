@@ -5,6 +5,7 @@ dependencies:
     - field.storage.user.field_migrate_example_gender
   module:
     - options
+    - user
 id: user.user.field_migrate_example_gender
 field_name: field_migrate_example_gender
 entity_type: user

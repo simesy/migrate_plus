@@ -12,7 +12,9 @@ description: A few simple beer-related imports, to demonstrate how to implement 
 source_type: Custom tables
 
 # Here we add any default configuration settings to be shared among all
-# migrations in the group.
+# migrations in the group. For this example, the source tables are in the
+# Drupal (default) database, but usually if your source data is in a
+# database it will be external.
 shared_configuration:
   source:
     key: default

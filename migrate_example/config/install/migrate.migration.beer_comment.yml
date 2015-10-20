@@ -19,10 +19,10 @@ process:
   entity_type: 'constants/entity_type'
   field_name:
     plugin: default_value
-    default_value: comment
+    default_value: field_comments
   comment_type:
     plugin: default_value
-    default_value: comment
+    default_value: node_comments
   subject: subject
   uid:
     plugin: migration

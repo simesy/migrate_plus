@@ -4,3 +4,11 @@ description: 'Separate site configuration for the example from the actual migrat
 package: Migration
 core: 8.x
 hidden: 1
+dependencies:
+  - comment
+  - image
+  - text
+  - path
+  - entity_reference
+  - options
+  - taxonomy
