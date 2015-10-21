@@ -213,13 +213,13 @@ function migrate_example_beer_schema_account() {
         'not null' => TRUE,
         'description' => 'Blocked_Allowed',
       ),
-      'posted' => array(
+      'registered' => array(
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'description' => 'Registration date',
       ),
-      'name' => array(
+      'username' => array(
         'type' => 'varchar',
         'length' => 255,
         'not null' => FALSE,
@@ -237,7 +237,7 @@ function migrate_example_beer_schema_account() {
         'not null' => FALSE,
         'description' => 'Account password (raw)',
       ),
-      'mail' => array(
+      'email' => array(
         'type' => 'varchar',
         'length' => 255,
         'not null' => FALSE,
@@ -276,10 +276,10 @@ function migrate_example_beer_data_node() {
   $query->execute();
 }
 
-// Note that alice has duplicate username. Exercises dedupe() method.
+// Note that alice has duplicate username. Exercises dedupe_entity plugin.
 // @TODO duplicate email also.
 function migrate_example_beer_data_account() {
-  $fields = array('status', 'posted', 'name', 'nickname', 'password', 'mail', 'sex', 'beers');
+  $fields = array('status', 'registered', 'username', 'nickname', 'password', 'email', 'sex', 'beers');
   $query = db_insert('migrate_example_beer_account')
     ->fields($fields);
   $data = array(
@@ -303,7 +303,7 @@ function migrate_example_beer_data_comment() {
     array(99999998, NULL, 'im second', 'aromatic', 'alice', 'alice@example.com', 0),
     array(99999999, NULL, 'im parent', 'malty', 'alice', 'alice@example.com', 0),
     array(99999999, 1, 'im child', 'cold body', 'bob', NULL, 1),
-    array(99999999, 2, 'im grandchild', 'bitter body', 'charlie@example.com', NULL, 1),
+    array(99999999, 4, 'im grandchild', 'bitter body', 'charlie@example.com', NULL, 1),
   );
   foreach ($data as $row) {
     $query->values(array_combine($fields, $row));
