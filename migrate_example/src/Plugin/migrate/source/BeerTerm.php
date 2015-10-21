@@ -7,6 +7,8 @@
 
 namespace Drupal\migrate_example\Plugin\migrate\source;
 
+use Drupal\migrate\Plugin\migrate\source\SqlBase;
+
 /**
  * Drupal 6 user source from database.
  *
@@ -14,7 +16,7 @@ namespace Drupal\migrate_example\Plugin\migrate\source;
  *   id = "beer_term"
  * )
  */
-class BeerTerm extends MigrateExampleSqlBase {
+class BeerTerm extends SqlBase {
 
   /**
    * {@inheritdoc}

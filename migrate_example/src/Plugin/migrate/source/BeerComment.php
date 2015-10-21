@@ -7,6 +7,8 @@
 
 namespace Drupal\migrate_example\Plugin\migrate\source;
 
+use Drupal\migrate\Plugin\migrate\source\SqlBase;
+
 /**
  * Drupal 6 comment source from database.
  *
@@ -14,7 +16,7 @@ namespace Drupal\migrate_example\Plugin\migrate\source;
  *   id = "beer_comment"
  * )
  */
-class BeerComment extends MigrateExampleSqlBase {
+class BeerComment extends SqlBase {
 
   /**
    * {@inheritdoc}

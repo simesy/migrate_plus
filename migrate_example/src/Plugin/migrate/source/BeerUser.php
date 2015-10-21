@@ -7,6 +7,7 @@
 
 namespace Drupal\migrate_example\Plugin\migrate\source;
 
+use Drupal\migrate\Plugin\migrate\source\SqlBase;
 use Drupal\migrate\Row;
 
 /**
@@ -16,7 +17,7 @@ use Drupal\migrate\Row;
  *   id = "beer_user"
  * )
  */
-class BeerUser extends MigrateExampleSqlBase {
+class BeerUser extends SqlBase {
 
   /**
    * {@inheritdoc}
