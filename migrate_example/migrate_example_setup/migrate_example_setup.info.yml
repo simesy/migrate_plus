@@ -9,6 +9,5 @@ dependencies:
   - image
   - text
   - path
-  - entity_reference
   - options
   - taxonomy
