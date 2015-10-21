@@ -8,6 +8,5 @@ dependencies:
   - comment
   - image
   - text
-  - path
   - options
   - taxonomy

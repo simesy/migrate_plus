@@ -246,7 +246,7 @@ function migrate_example_beer_schema_account() {
       'sex' => array(
         'type' => 'int',
         'not null' => FALSE,
-        'description' => 'Gender',
+        'description' => 'Gender (0 for male, 1 for female)',
       ),
       'beers' => array(
         'type' => 'varchar',

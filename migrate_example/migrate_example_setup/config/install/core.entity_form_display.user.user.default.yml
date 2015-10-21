@@ -23,9 +23,11 @@ content:
     type: entity_reference_autocomplete
   field_migrate_example_gender:
     weight: 8
-    settings: {  }
+    settings:
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
-    type: options_select
+    type: string_textfield
   language:
     weight: 0
   timezone:
