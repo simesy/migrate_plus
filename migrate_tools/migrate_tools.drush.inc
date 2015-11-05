@@ -165,6 +165,8 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
         $source_plugin = $migration->getSourcePlugin();
       }
       catch (Exception $e) {
+        drush_log(dt('Failure retrieving information on @migration: @message',
+          ['@migration' => $migration_id, '@message' => $e->getMessage()]));
         continue;
       }
       try {
@@ -190,23 +192,6 @@ function drush_migrate_tools_migrate_status($migration_names = '') {
       }
       else {
         $status = $migration->getStatusLabel();
-/*        switch ($status) {
-          case MigrationInterface::STATUS_IDLE:
-            $status = dt('Idle');
-            break;
-          case MigrationInterface::STATUS_IMPORTING:
-            $status = dt('Importing');
-            break;
-          case MigrationInterface::STATUS_ROLLING_BACK:
-            $status = dt('Rolling back');
-            break;
-          case MigrationInterface::STATUS_STOPPING:
-            $status = dt('Stopping');
-            break;
-          default:
-            $status = dt('Invalid');
-            break;
-        }*/
         $migrate_last_imported_store = \Drupal::keyValue('migrate_last_imported');
         $last_imported =  $migrate_last_imported_store->get($migration->id(), FALSE);
         if ($last_imported) {
