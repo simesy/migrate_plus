@@ -98,7 +98,7 @@ function migrate_tools_drush_command() {
   ];
 
   $items['migrate-manifest'] = [
-    'description' => 'Execute the migrations as specified in a manifest file.',
+    'description' => 'Deprecated - please use the migrate-manifest2 command from the migrate_manifest module instead.',
     'arguments' => [
       'manifest' => 'The path to the manifest file',
     ],
@@ -456,13 +456,21 @@ function drush_migrate_tools_migration_list($group_id = '', $migration_ids = '')
  *   The path to the manifest file.
  */
 function drush_migrate_tools_migrate_manifest($manifest) {
-  try {
-    $manifest_runner = new MigrateManifest($manifest);
-    return $manifest_runner->import();
+  if (\Drupal::moduleHandler()->moduleExists('migrate_manifest')) {
+    $path = drupal_get_path('module', 'migrate_manifest');
+    require_once \Drupal::root() . '/' . $path . '/migrate_manifest.drush.inc';
+    drush_migrate_manifest_migrate_manifest2($manifest);
   }
-  catch (\Exception $e) {
-    drush_set_error('MIGRATE_ERROR', $e->getMessage());
-  }
+  else {
+    drush_log(dt('The migrate_plus version of the migrate-manifest command is deprecated and will be removed soon. Please install the migrate_manifest module and use its migrate-manifest2 command instead.'), 'warning');
+    try {
+      $manifest_runner = new MigrateManifest($manifest);
+      return $manifest_runner->import();
+    }
+    catch (\Exception $e) {
+      drush_set_error('MIGRATE_ERROR', $e->getMessage());
+    }
 
-  drush_invoke_process('@self', 'cache-rebuild', [], [], FALSE);
+    drush_invoke_process('@self', 'cache-rebuild', [], [], FALSE);
+  }
 }
