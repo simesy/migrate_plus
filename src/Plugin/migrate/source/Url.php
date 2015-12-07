@@ -155,11 +155,8 @@ abstract class Url extends SourcePluginExtension {
    *   The number of available source records.
    */
   public function computeCount() {
-    $count = 0;
-    foreach ($this->sourceUrls as $url) {
-      $iterator = new $this->iteratorClass($this);
-      $count += $iterator->count();
-    }
+    $iterator = new $this->iteratorClass($this);
+    $count = $iterator->count();
 
     return $count;
   }
