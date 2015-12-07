@@ -8,9 +8,10 @@
 namespace Drupal\migrate_plus;
 
 use Drupal\Core\Plugin\PluginBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Defines a base tour item implementation.
+ * Defines a base reader implementation.
  *
  * @see \Drupal\migrate_plus\Annotation\Reader
  * @see \Drupal\migrate_plus\ReaderPluginInterface
@@ -22,23 +23,15 @@ abstract class ReaderPluginBase extends PluginBase implements ReaderPluginInterf
   /**
    * {@inheritdoc}
    */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static($configuration, $plugin_id, $plugin_definition);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function id() {
-    return $this->get('id');
+    return $this->configuration['id'];
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function get($key) {
-    if (!empty($this->configuration[$key])) {
-      return $this->configuration[$key];
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function set($key, $value) {
-    $this->configuration[$key] = $value;
-  }
 }

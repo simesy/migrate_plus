@@ -12,9 +12,7 @@ use Drupal\Component\Annotation\Plugin;
 /**
  * Defines a migration reader annotation object.
  *
- * Plugin Namespace: Plugin\migrate_plus\tip
- *
- * For a working example, see \Drupal\migrate_plus\Plugin\migrate_plus\reader\urlReader
+ * Plugin Namespace: Plugin\migrate_plus\reader
  *
  * @see \Drupal\migrate_plus\ReaderPluginBase
  * @see \Drupal\migrate_plus\ReaderPluginInterface

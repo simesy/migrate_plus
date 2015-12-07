@@ -25,26 +25,4 @@ interface ReaderPluginInterface {
    */
   public function id();
 
-  /**
-   * Used for returning values by key.
-   *
-   * @var string
-   *   Key of the value.
-   *
-   * @return string
-   *   Value of the key.
-   */
-  public function get($key);
-
-  /**
-   * Used for returning values by key.
-   *
-   * @var string
-   *   Key of the value.
-   *
-   * @var string
-   *   Value of the key.
-   */
-  public function set($key, $value);
-
 }

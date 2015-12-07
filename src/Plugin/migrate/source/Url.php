@@ -8,6 +8,7 @@
 namespace Drupal\migrate_plus\Plugin\migrate\source;
 
 use Drupal\migrate\Entity\MigrationInterface;
+use Drupal\migrate_plus\ReaderPluginInterface;
 
 /**
  * Source plugin for retrieving data via URLs.
@@ -46,6 +47,13 @@ abstract class Url extends SourcePluginExtension {
   }
 
   /**
+   * The reader plugin.
+   *
+   * @var \Drupal\migrate_plus\ReaderPluginInterface
+   */
+  protected $readerPlugin;
+
+  /**
    * The query string used to recognize elements being iterated.
    *
    * This is an xpath-like expression.
@@ -64,14 +72,7 @@ abstract class Url extends SourcePluginExtension {
       $configuration['urls'] = [$configuration['urls']];
     }
 
-    if (!empty($configuration['iterator_class'])) {
-      $this->iteratorClass = $configuration['iterator_class'];
-    }
-
-    if (!empty($configuration['reader_class'])) {
-      $this->readerClass = $configuration['reader_class'];
-    }
-
+    $this->iteratorClass = '\Drupal\migrate_plus\Plugin\migrate\source\UrlIterator';
     $this->itemSelector = $configuration['item_selector'];
     $this->sourceUrls = $configuration['urls'];
   }
@@ -106,6 +107,16 @@ abstract class Url extends SourcePluginExtension {
    */
   public function iteratorClass() {
     return $this->iteratorClass;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getReaderPlugin() {
+    if (!isset($this->readerPlugin)) {
+      $this->readerPlugin = \Drupal::service('plugin.manager.migrate_plus.reader')->createInstance($this->configuration['reader_plugin'], $this->configuration, $this);
+    }
+    return $this->readerPlugin;
   }
 
   /**

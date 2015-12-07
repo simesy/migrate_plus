@@ -13,7 +13,7 @@ namespace Drupal\migrate_plus\Plugin\migrate\source;
  * This class is independent from XmlReader primarily to support multiple
  * input XML documents in a single migration.
  */
-abstract class UrlIterator implements \Iterator, \Countable {
+class UrlIterator implements \Iterator, \Countable {
 
   /**
    * The XmlReader currently in use.
@@ -63,6 +63,14 @@ abstract class UrlIterator implements \Iterator, \Countable {
   public function __construct(Url $url_source) {
     $this->urlSource = $url_source;
     $this->sourceUrls = $this->urlSource->sourceUrls();
+  }
+
+  protected function createReader() {
+    $reader_class = $this->urlSource->getReaderClass();
+    return new $reader_class(
+            $this->sourceUrls[$this->activeUrl],
+                  $this->urlSource,
+                  $this->urlSource->itemSelector());
   }
 
   /**
@@ -164,7 +172,6 @@ abstract class UrlIterator implements \Iterator, \Countable {
           // Avoid below invalid index into $this->sourceUrls
         }
       }
-
 
       $this->reader = $this->createReader();
       $this->reader->rewind();

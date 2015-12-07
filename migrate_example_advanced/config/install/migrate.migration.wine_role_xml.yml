@@ -7,6 +7,7 @@ third_party_settings:
 source:
   # We use the XML source plugin.
   plugin: xml
+#  reader_plugin: xml
   # Normally, this is one or more fully-qualified URLs or file paths. Because
   # we can't hardcode your local URL, we provide a relative path here which
   # hook_install() will rewrite to a full URL for the current site.
