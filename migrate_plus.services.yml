@@ -1,0 +1,4 @@
+services:
+  plugin.manager.migrate_plus.reader:
+    class: Drupal\migrate_plus\ReaderPluginManager
+    parent: default_plugin_manager

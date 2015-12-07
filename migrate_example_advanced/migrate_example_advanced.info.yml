@@ -7,3 +7,5 @@ dependencies:
   - migrate
   - migrate_example_advanced_setup
   - migrate_plus
+  - migrate_source_json
+  - migrate_source_xml

@@ -9,3 +9,4 @@ dependencies:
   - image
   - text
   - taxonomy
+  - rest
