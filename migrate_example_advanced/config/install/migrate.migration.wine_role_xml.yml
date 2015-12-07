@@ -1,7 +1,9 @@
 # This migration demonstrates importing from a monolithic XML file.
 id: wine_role_xml
 label: XML feed of roles (positions)
-migration_group: wine
+third_party_settings:
+  migrate_plus:
+    migration_group: wine
 source:
   # We use the XML source plugin.
   plugin: xml

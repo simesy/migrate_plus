@@ -1,7 +1,9 @@
 # This migration demonstrates importing from a monolithic JSON file.
 id: wine_role_json
 label: JSON feed of roles (positions)
-migration_group: wine
+third_party_settings:
+  migrate_plus:
+    migration_group: wine
 source:
   # We use the JSON source plugin.
   plugin: json
