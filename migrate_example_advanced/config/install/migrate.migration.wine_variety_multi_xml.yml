@@ -26,10 +26,10 @@ source:
   # is relative to the elements retrieved by item_xpath.
   fields:
     category_name:
-      label:
+      label: Name
       selector: name
     category_details:
-      label:
+      label: Details
       selector: details
     category_parent:
       label: 'Unique position identifier'
@@ -53,5 +53,5 @@ process:
 destination:
   plugin: entity:taxonomy_term
 migration_dependencies:
-  require:
+  required:
     - wine_terms

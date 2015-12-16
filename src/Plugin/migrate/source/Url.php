@@ -23,13 +23,6 @@ abstract class Url extends SourcePluginExtension {
   protected $sourceUrls = [];
 
   /**
-   * The iterator class used to traverse the XML.
-   *
-   * @var string
-   */
-  protected $iteratorClass = '';
-
-  /**
    * The reader class used to traverse the XML.
    *
    * @var string
@@ -72,7 +65,10 @@ abstract class Url extends SourcePluginExtension {
       $configuration['urls'] = [$configuration['urls']];
     }
 
-    $this->iteratorClass = '\Drupal\migrate_plus\Plugin\migrate\source\UrlIterator';
+    if (!empty($configuration['reader_class'])) {
+      $this->readerClass = $configuration['reader_class'];
+    }
+
     $this->itemSelector = $configuration['item_selector'];
     $this->sourceUrls = $configuration['urls'];
   }
@@ -97,16 +93,6 @@ abstract class Url extends SourcePluginExtension {
    */
   public function sourceUrls() {
     return $this->sourceUrls;
-  }
-
-  /**
-   * Gets the iterator class used to traverse the XML.
-   *
-   * @return string
-   *   The name of the class to be used for low-level XML processing.
-   */
-  public function iteratorClass() {
-    return $this->iteratorClass;
   }
 
   /**
@@ -142,23 +128,15 @@ abstract class Url extends SourcePluginExtension {
    *   configured itemSelector.
    */
   protected function initializeIterator() {
-    $iterator_class = $this->iteratorClass();
-    $iterator = new $iterator_class($this);
-
-    return $iterator;
+    return $this->createReader();
   }
 
-  /**
-   * Return a count of all available source records.
-   *
-   * @return int
-   *   The number of available source records.
-   */
-  public function computeCount() {
-    $iterator = new $this->iteratorClass($this);
-    $count = $iterator->count();
-
-    return $count;
+  protected function createReader() {
+    $reader_class = $this->getReaderClass();
+    return new $reader_class(
+            $this->sourceUrls,
+                  $this,
+                  $this->itemSelector());
   }
 
   /**
