@@ -12,8 +12,12 @@ use Drupal\migrate_plus\ReaderPluginInterface;
 
 /**
  * Source plugin for retrieving data via URLs.
+ *
+ * @MigrateSource(
+ *   id = "url"
+ * )
  */
-abstract class Url extends SourcePluginExtension {
+class Url extends SourcePluginExtension {
 
   /**
    * The source URLs to retrieve.
@@ -23,23 +27,6 @@ abstract class Url extends SourcePluginExtension {
   protected $sourceUrls = [];
 
   /**
-   * The reader class used to traverse the XML.
-   *
-   * @var string
-   */
-  protected $readerClass = '';
-
-  /**
-   * The reader class serving as a cursor over the XML source.
-   *
-   * @return string
-   *   XMLReader
-   */
-  public function getReaderClass() {
-    return $this->readerClass;
-  }
-
-  /**
    * The reader plugin.
    *
    * @var \Drupal\migrate_plus\ReaderPluginInterface
@@ -47,30 +34,24 @@ abstract class Url extends SourcePluginExtension {
   protected $readerPlugin;
 
   /**
-   * The query string used to recognize elements being iterated.
-   *
-   * This is an xpath-like expression.
-   *
-   * @var string
-   */
-  protected $itemSelector = '';
-
-  /**
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $migration);
-
     if (!is_array($configuration['urls'])) {
       $configuration['urls'] = [$configuration['urls']];
     }
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $migration);
 
-    if (!empty($configuration['reader_class'])) {
-      $this->readerClass = $configuration['reader_class'];
-    }
-
-    $this->itemSelector = $configuration['item_selector'];
     $this->sourceUrls = $configuration['urls'];
+
+    // Set a default Accept header.
+/*    $this->headers = array_merge(['Accept' => 'application/json'],
+      $configuration['headers'] ?: []);*/
+
+    // See if this is a paged response with next links. If so, add to the source_urls array.
+/*    foreach ( (array) $configuration['urls'] as $url) {
+      $this->sourceUrls += $this->getNextLinks($url);
+    }*/
   }
 
   /**
@@ -86,16 +67,6 @@ abstract class Url extends SourcePluginExtension {
   }
 
   /**
-   * Gets the source URLs where the data is located.
-   *
-   * @return array
-   *   Array of URLs
-   */
-  public function sourceUrls() {
-    return $this->sourceUrls;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function getReaderPlugin() {
@@ -106,21 +77,6 @@ abstract class Url extends SourcePluginExtension {
   }
 
   /**
-   * Gets the xpath-like query controlling the iterated elements.
-   *
-   * Matching elements will be presented by the iterator. Most xpath syntax
-   * is supported (it is evaluated by \SimpleXMLElement::xpath), however the
-   * SimpleXMLElement object is rooted at the context node and has no ancestors
-   * available.
-   *
-   * @return string
-   *   An xpath-like expression.
-   */
-  public function itemSelector() {
-    return $this->itemSelector;
-  }
-
-  /**
    * Creates and returns a filtered Iterator over the documents.
    *
    * @return \Iterator
@@ -128,31 +84,58 @@ abstract class Url extends SourcePluginExtension {
    *   configured itemSelector.
    */
   protected function initializeIterator() {
-    return $this->createReader();
-  }
-
-  protected function createReader() {
-    $reader_class = $this->getReaderClass();
-    return new $reader_class(
-            $this->sourceUrls,
-                  $this,
-                  $this->itemSelector());
+    return $this->getReaderPlugin();
   }
 
   /**
-   * Return the selectors used to populate each configured field.
-   *
-   * @return string[]
-   *   Array of selectors, keyed by field name.
+   * Collect an array of next links from a paged response.
    */
-  public function fieldSelectors() {
-    $fields = [];
-    foreach ($this->configuration['fields'] as $field_name => $field_info) {
-      if (isset($field_info['selector'])) {
-        $fields[$field_name] = $field_info['selector'];
+/*  protected function getNextLinks($url) {
+    $urls = array();
+    $more = TRUE;
+    while ($more == TRUE) {
+      $response = $this->reader->getClient()->getResponse($url);
+      if ($url = $this->getNextFromHeaders($response)) {
+        $urls[] = $url;
+      }
+      elseif ($url = $this->getNextFromLinks($response)) {
+        $urls[] = $url;
+      }
+      else {
+        $more = FALSE;
       }
     }
-    return $fields;
+    return $urls;
   }
-
+*/
+  /**
+   * See if the next link is in a 'links' group in the response.
+   *
+   * @param \Psr\Http\Message\ResponseInterface $response
+   */
+/*  protected function getNextFromLinks(ResponseInterface $response) {
+    $body = json_decode($response->getBody(), TRUE);
+    if (!empty($body['links']) && array_key_exists('next', $body['links'])) {
+      return $body['links']['next'];
+    }
+    return FALSE;
+  }
+*/
+  /**
+   * See if the next link is in the header.
+   *
+   * @param \Psr\Http\Message\ResponseInterface $response
+   */
+/*  protected function getNextFromHeaders(ResponseInterface $response) {
+    $headers = $response->getHeader('Link');
+    foreach ($headers as $header) {
+      $matches = array();
+      preg_match('/^<(.*)>; rel="next"$/', $header, $matches);
+      if (!empty($matches) && !empty($matches[1])) {
+        return $matches[1];
+      }
+    }
+    return FALSE;
+  }
+*/
 }

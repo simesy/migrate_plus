@@ -6,7 +6,8 @@ third_party_settings:
     migration_group: wine
 source:
   # We use the JSON source plugin.
-  plugin: json
+  plugin: url
+  reader_plugin: json
   # Normally, this is one or more fully-qualified URLs or file paths. Because
   # we can't hardcode your local URL, we provide a relative path here which
   # hook_install() will rewrite to a full URL for the current site.

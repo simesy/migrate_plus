@@ -15,14 +15,6 @@ namespace Drupal\migrate_plus;
  * @see \Drupal\migrate_plus\ReaderPluginManager
  * @see plugin_api
  */
-interface ReaderPluginInterface {
-
-  /**
-   * Returns id of the reader.
-   *
-   * @return string
-   *   The id of the reader.
-   */
-  public function id();
+interface ReaderPluginInterface extends \Iterator, \Countable {
 
 }
