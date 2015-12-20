@@ -1,0 +1,10 @@
+{
+    "name": "drupal/migrate_plus",
+    "description": "Enhancements to core migration support.",
+    "type": "drupal-module",
+    "require": {
+        "drupal/migrate": "8.*"
+    },
+    "license": "GPL2"
+}
+
