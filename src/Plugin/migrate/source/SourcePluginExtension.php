@@ -49,8 +49,8 @@ abstract class SourcePluginExtension extends SourcePluginBase {
    */
   public function fields() {
     $fields = [];
-    foreach ($this->fields as $field_name => $field_info) {
-      $fields[$field_name] = isset($field_info['label']) ? $field_info['label'] : $field_name;
+    foreach ($this->fields as $field_info) {
+      $fields[$field_info['name']] = isset($field_info['label']) ? $field_info['label'] : $field_info['name'];
     }
     return $fields;
   }

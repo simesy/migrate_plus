@@ -26,13 +26,16 @@ source:
   # an xpath for retrieving that value. It's important to note that this xpath
   # is relative to the elements retrieved by item_xpath.
   fields:
-    category_name:
+    -
+      name: category_name
       label: Name
       selector: name
-    category_details:
+    -
+      name: category_details
       label: Details
       selector: details
-    category_parent:
+    -
+      name: category_parent
       label: 'Unique position identifier'
       selector: parent
   # Under 'ids', we identify source fields populated above which will uniquely

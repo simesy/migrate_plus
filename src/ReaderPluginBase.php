@@ -25,7 +25,7 @@ abstract class ReaderPluginBase extends PluginBase implements ReaderPluginInterf
    *
    * @var string[]
    */
-  public $urls;
+  protected $urls;
 
   /**
    * Index of the currently-open url.
@@ -39,7 +39,7 @@ abstract class ReaderPluginBase extends PluginBase implements ReaderPluginInterf
    *
    * @var string
    */
-  public $itemSelector;
+  protected $itemSelector;
 
   /**
    * Current item when iterating.
@@ -72,7 +72,7 @@ abstract class ReaderPluginBase extends PluginBase implements ReaderPluginInterf
   }
 
   /**
-   * Implementation of Iterator::rewind().
+   * {@inheritdoc}
    */
   public function rewind() {
     $this->activeUrl = NULL;
@@ -101,19 +101,30 @@ abstract class ReaderPluginBase extends PluginBase implements ReaderPluginInterf
     }
   }
 
+  /**
+   * Opens the specified URL.
+   *
+   * @param $url
+   *   URL to open.
+   *
+   * @return bool
+   *   TRUE if the URL was successfully opened, FALSE otherwise.
+   */
   abstract protected function openSourceUrl($url);
 
+  /**
+   * Retrieves the next row of data from the open source URL, populating
+   * currentItem and currentId.
+   */
   abstract protected function fetchNextRow();
 
   /**
    * Advances the reader to the next source url.
    *
    * @return bool
-   *   TRUE if a valid source was loaded
+   *   TRUE if a valid source URL was opened
    */
   protected function nextSource() {
-    $status = FALSE;
-
     while ($this->activeUrl === NULL || (count($this->urls) - 1) > $this->activeUrl) {
       if (is_null($this->activeUrl)) {
         $this->activeUrl = 0;
@@ -128,39 +139,29 @@ abstract class ReaderPluginBase extends PluginBase implements ReaderPluginInterf
 
       if ($this->openSourceUrl($this->urls[$this->activeUrl])) {
         // We have a valid source.
-        $status = TRUE;
-        break;
+        return TRUE;
       }
     }
 
-    return $status;
+    return FALSE;
   }
 
   /**
-   * Implementation of Iterator::current().
-   *
-   * @return mixed
-   *   Current item
+   * {@inheritdoc}
    */
   public function current() {
     return $this->currentItem;
   }
 
   /**
-   * Implementation of Iterator::key().
-   *
-   * @return null|string
-   *   Current key
+   * {@inheritdoc}
    */
   public function key() {
     return $this->currentId;
   }
 
   /**
-   * Implementation of Iterator::valid().
-   *
-   * @return bool
-   *   Indicates if current item is valid
+   * {@inheritdoc}
    */
   public function valid() {
     return $this->currentItem;
@@ -185,9 +186,9 @@ abstract class ReaderPluginBase extends PluginBase implements ReaderPluginInterf
    */
   protected function fieldSelectors() {
     $fields = [];
-    foreach ($this->configuration['fields'] as $field_name => $field_info) {
+    foreach ($this->configuration['fields'] as $field_info) {
       if (isset($field_info['selector'])) {
-        $fields[$field_name] = $field_info['selector'];
+        $fields[$field_info['name']] = $field_info['selector'];
       }
     }
     return $fields;
