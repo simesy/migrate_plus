@@ -67,11 +67,14 @@ class Url extends SourcePluginExtension {
   }
 
   /**
-   * {@inheritdoc}
+   * Returns the initialized reader plugin.
+   *
+   * @return \Drupal\migrate_plus\ReaderPluginInterface
+   *   The reader plugin.
    */
   public function getReaderPlugin() {
     if (!isset($this->readerPlugin)) {
-      $this->readerPlugin = \Drupal::service('plugin.manager.migrate_plus.reader')->createInstance($this->configuration['reader_plugin'], $this->configuration, $this);
+      $this->readerPlugin = \Drupal::service('plugin.manager.migrate_plus.reader')->createInstance($this->configuration['reader_plugin'], $this->configuration);
     }
     return $this->readerPlugin;
   }
@@ -81,7 +84,7 @@ class Url extends SourcePluginExtension {
    *
    * @return \Iterator
    *   An iterator over the documents providing source rows that match the
-   *   configured itemSelector.
+   *   configured item_selector.
    */
   protected function initializeIterator() {
     return $this->getReaderPlugin();

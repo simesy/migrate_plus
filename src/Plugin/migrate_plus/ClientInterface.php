@@ -11,7 +11,7 @@ namespace Drupal\migrate_plus\Plugin\migrate_plus;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * Provides an interface for HTTP clients.
+ * Provides an interface for data retrieval clients.
  */
 interface ClientInterface {
 
@@ -31,13 +31,19 @@ interface ClientInterface {
   /**
    * Return content.
    *
-   * @return
+   * @param $url
+   *   URL to retrieve from.
+   *
+   * @return string
    *   Content at the given url.
    */
   public function getResponseContent($url);
 
   /**
    * Return Http Response object for a given url.
+   *
+   * @param $url
+   *   URL to retrieve from.
    *
    * @return \Psr\Http\Message\ResponseInterface
    */

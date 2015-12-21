@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\migrate_plus\Plugin\migrate_plus\Client.
+ * Contains Drupal\migrate_plus\Plugin\migrate_plus\HttpClient.
  *
  * Uses the Guzzle HTTP Client library, which is wrapped by \Drupal::httpClient.
  *
@@ -17,14 +17,14 @@ use GuzzleHttp\Exception\RequestException;
 /**
  * Object to retrieve and iterate over data retrieved from an HTTP endpoint.
  */
-class Client implements ClientInterface {
+class HttpClient implements ClientInterface {
 
   /**
    * The HTTP Client
    *
    * @var \GuzzleHttp\Client
    */
-  protected $http_client;
+  protected $httpClient;
 
   /**
    * The request headers.
@@ -34,18 +34,18 @@ class Client implements ClientInterface {
   protected $headers = [];
 
   public function __construct() {
-    $this->http_client = \Drupal::httpClient();
+    $this->httpClient = \Drupal::httpClient();
   }
 
   /**
-   * Set the client headers.
+   * {@inheritdoc}
    */
-  public function setRequestHeaders( array $headers ) {
+  public function setRequestHeaders(array $headers) {
     $this->headers = $headers;
   }
 
   /**
-   * Get the currently set headers.
+   * {@inheritdoc}
    */
   public function getRequestHeaders() {
     return !empty($this->headers) ? $this->headers : array();
@@ -56,7 +56,7 @@ class Client implements ClientInterface {
    */
   public function getResponse($url) {
     try {
-      $response = $this->http_client->get($url, array(
+      $response = $this->httpClient->get($url, array(
         'headers' => $this->getRequestHeaders(),
         // Uncomment the following to debug the request.
         //'debug' => true,
@@ -64,7 +64,8 @@ class Client implements ClientInterface {
       if (empty($response)) {
         throw new MigrateException('No response at ' . $url . '.');
       }
-    } catch (RequestException $e) {
+    }
+    catch (RequestException $e) {
       throw new MigrateException('Error message: ' . $e->getMessage() . ' at ' . $url .'.');
     }
     return $response;
