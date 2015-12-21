@@ -20,10 +20,12 @@ source:
   # an xpath for retrieving that value. It's important to note that this xpath
   # is relative to the elements retrieved by item_xpath.
   fields:
-    machine_name:
+    -
+      name: machine_name
       label: 'Unique position identifier'
       selector: sourceid
-    friendly_name:
+    -
+      name: friendly_name
       label: 'Position name'
       selector: name
   # Under 'ids', we identify source fields populated above which will uniquely

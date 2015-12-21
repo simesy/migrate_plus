@@ -186,9 +186,9 @@ abstract class ReaderPluginBase extends PluginBase implements ReaderPluginInterf
    */
   protected function fieldSelectors() {
     $fields = [];
-    foreach ($this->configuration['fields'] as $field_name => $field_info) {
+    foreach ($this->configuration['fields'] as $field_info) {
       if (isset($field_info['selector'])) {
-        $fields[$field_name] = $field_info['selector'];
+        $fields[$field_info['name']] = $field_info['selector'];
       }
     }
     return $fields;
